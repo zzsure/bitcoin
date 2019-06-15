@@ -1,13 +1,14 @@
 package v1
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/op/go-logging"
 	"gitlab.azbit.cn/web/bitcoin/controller/request"
 	"gitlab.azbit.cn/web/bitcoin/controller/response"
-	"math/rand"
-	"time"
 )
 
 var logger = logging.MustGetLogger("controller/v1")
@@ -24,4 +25,3 @@ func Echo(c *gin.Context) {
 	time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
 	response.Response(c, 0, "", input.Data)
 }
-

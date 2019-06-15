@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/op/go-logging"
-	"gitlab.azbit.cn/web/bitcoin/conf"
 	goLog "log"
 	"os"
 	"runtime"
+
+	"github.com/op/go-logging"
+	"gitlab.azbit.cn/web/bitcoin/conf"
 )
 
 type RequestID string
@@ -91,4 +92,3 @@ func WrapError(err error) error {
 	_, file, line, _ := runtime.Caller(1)
 	return errors.New(fmt.Sprintf("%s:%d %s", file, line, err.Error()))
 }
-

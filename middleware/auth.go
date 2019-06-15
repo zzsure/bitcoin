@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/gin-gonic/gin"
 	"gitlab.azbit.cn/web/bitcoin/conf"
 	"gitlab.azbit.cn/web/bitcoin/controller/response"
-	"io/ioutil"
 )
 
 var whitePaths = map[string]struct{}{
@@ -59,4 +60,3 @@ func Auth(c *gin.Context) {
 
 	c.Next()
 }
-

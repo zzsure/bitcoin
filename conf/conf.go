@@ -1,10 +1,11 @@
 package conf
 
 import (
-	"gitlab.azbit.cn/web/bitcoin/library/util"
-    "github.com/koding/multiconfig"
 	"strings"
 	"time"
+
+	"github.com/koding/multiconfig"
+	"gitlab.azbit.cn/web/bitcoin/library/util"
 )
 
 type ConfigTOML struct {

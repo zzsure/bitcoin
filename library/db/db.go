@@ -2,10 +2,11 @@ package db
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"gitlab.azbit.cn/web/bitcoin/conf"
-	"time"
 )
 
 var DB *gorm.DB
@@ -25,4 +26,3 @@ func Init() {
 	DB.DB().SetMaxIdleConns(conf.Config.Database.Conn.MaxIdle)
 	DB.DB().SetMaxOpenConns(conf.Config.Database.Conn.MaxOpen)
 }
-

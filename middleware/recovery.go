@@ -3,11 +3,12 @@ package middleware
 import (
 	"bytes"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http/httputil"
 	"runtime"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -94,4 +95,3 @@ func timeFormat(t time.Time) string {
 	var timeString = t.Format("2006/01/02 - 15:04:05")
 	return timeString
 }
-

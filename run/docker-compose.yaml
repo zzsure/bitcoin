@@ -13,4 +13,4 @@ services:
     entrypoint:
       - bash
       - -c
-      - make ${TARGET:-dev} MAIN_PKG=${MAIN_PKG:-bitcoin} ARG='${ARG}'
+      - make ${TARGET:-dev} MAIN_PKG=${MAIN_PKG:-bitcoin} ARG='${ARG:-server}'

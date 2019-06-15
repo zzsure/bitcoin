@@ -58,4 +58,3 @@ func WrapSignHeader(body []byte, key, secret string) http.Header {
 	header.Set("Aibee-Auth-Sign", sign)
 	return header
 }
-

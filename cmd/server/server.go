@@ -8,12 +8,13 @@ import (
 	"gitlab.azbit.cn/web/bitcoin/library/db"
 	"gitlab.azbit.cn/web/bitcoin/library/log"
 	"gitlab.azbit.cn/web/bitcoin/middleware"
+	"gitlab.azbit.cn/web/bitcoin/modules/socket"
 )
 
 var Server = cli.Command{
-    Name: "server",
-    Usage: "bitcoin http server",
-    Flags: []cli.Flag{
+	Name:  "server",
+	Usage: "bitcoin http server",
+	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "conf, c",
 			Value: "config.toml",
@@ -32,6 +33,7 @@ func run(c *cli.Context) {
 	conf.Init(c.String("conf"), c.String("args"))
 	log.Init()
 	db.Init()
+	socket.Init()
 
 	GinEngine().Run(conf.Config.Server.Listen)
 }
@@ -46,7 +48,7 @@ func GinEngine() *gin.Engine {
 		r = gin.Default()
 	}
 	r.Use(middleware.Access)
-    r.Use(middleware.Auth)
+	r.Use(middleware.Auth)
 	r.GET("/health")
 	V1(r)
 

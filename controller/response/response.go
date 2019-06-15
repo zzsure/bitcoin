@@ -25,4 +25,3 @@ func ServerErr(c *gin.Context, msg string) {
 func Success(c *gin.Context) {
 	Response(c, 0, "success", nil)
 }
-

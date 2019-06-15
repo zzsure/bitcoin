@@ -2,14 +2,15 @@ package middleware
 
 import (
 	"encoding/json"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/op/go-logging"
 	"github.com/satori/go.uuid"
 	"gitlab.azbit.cn/web/bitcoin/conf"
 	"gitlab.azbit.cn/web/bitcoin/library/log"
-	"net/http"
-	"os"
-	"time"
 )
 
 var logger = logging.MustGetLogger("middleware")
