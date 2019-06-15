@@ -4,7 +4,7 @@ import "gitlab.azbit.cn/web/bitcoin/library/db"
 
 type KLineData struct {
 	Model
-	KID    int64   `json:"kid"`    // K线ID
+	Kid    int64   `json:"kid"`    // K线ID
 	Amount float64 `json:"amount"` // 成交量
 	Count  int64   `json:"count"`  // 成交笔数
 	Open   float64 `json:"open"`   // 开盘价
@@ -12,8 +12,8 @@ type KLineData struct {
 	Low    float64 `json:"low"`    // 最低价
 	High   float64 `json:"high"`   // 最高价
 	Vol    float64 `json:"vol"`    // 成交额, 即SUM(每一笔成交价 * 该笔的成交数量)
-	Ts     int64   `json:"ts"`
-	Ch     string  `json:"ch"`
+	Ch     string  `gorm:"unique_index:kline_chts_idx" json:"ch"`
+	Ts     int64   `gorm:"unique_index:kline_chts_idx" json:"ts"`
 }
 
 type KLineReturn struct {

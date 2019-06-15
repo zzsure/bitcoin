@@ -32,6 +32,12 @@ type ConfigTOML struct {
 		}
 	}
 
+	KLineData struct {
+		From     int64 `required:"true" default:1501174800 flagUsage:"socket获取数据开始时间戳"`
+		To       int64 `required:"true" default:1560355200 flagUsage:"socket获取数据结束时间戳"`
+		Duration int64 `required:"true" default:5 flagUsage:"每多少秒获取行情数据"`
+	}
+
 	Log struct {
 		Type  string `default:"json" flagUsage:"日志格式，json|raw"`
 		Level int    `default:"5" flagUsage:"日志级别：0 CRITICAL, 1 ERROR, 2 WARNING, 3 NOTICE, 4 INFO, 5 DEBUG"`

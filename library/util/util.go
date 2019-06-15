@@ -7,8 +7,13 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/satori/go.uuid"
 	"gitlab.azbit.cn/web/bitcoin/library/util/net"
 )
+
+func GenUUID() string {
+	return uuid.NewV4().String()
+}
 
 func GenServerUUID() string {
 	ip, mac := net.NewLAN().NetInfo()
