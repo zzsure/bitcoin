@@ -1,5 +1,5 @@
 [Server]
-Listen = ":80"
+Listen = ":81"
 Env = "Dev"
 MaxHttpRequestBody = 4
 
@@ -11,16 +11,29 @@ Secret = "U4LOTsSWEASOCXNl4lzyg0rOyGztm1so"
 [Database]
 HostPort = "tcp(172.17.0.1:3306)"
 UserPassword = "root:Eu*MZO7iw6^0w7gX"
-DB = "bitcoin"
+DB = "bc"
 [Database.Conn]
     MaxLifeTime = 600
     MaxIdle = 10
     MaxOpen = 80
 
+[Huobi]
+BuyRates = 0.002
+SaleRates = 0.002
+
 [KLineData]
-From = 1514736000
-To = 1546272060
+Symbol = "market.btcusdt.kline.1min"
+From = 1509465660
+To = 1560614400
 Duration = 5
+
+[Strategy]
+Type = "floating"
+[Strategy.Floating]
+    TotalAmount = 100000.0
+    FloatRate = 0.02
+    Depth = 4
+    Interval = 18000
 
 [Log]
 Type = "raw"

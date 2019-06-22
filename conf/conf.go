@@ -32,10 +32,26 @@ type ConfigTOML struct {
 		}
 	}
 
+	Huobi struct {
+		BuyRates  float64 `required:"true" default:0.0003 flagUsage:"买入手续费"`
+		SaleRates float64 `required:"true" default:0.0002 flagUsage:"卖出手续费"`
+	}
+
 	KLineData struct {
-		From     int64 `required:"true" default:1501174800 flagUsage:"socket获取数据开始时间戳"`
-		To       int64 `required:"true" default:1560355200 flagUsage:"socket获取数据结束时间戳"`
-		Duration int64 `required:"true" default:5 flagUsage:"每多少秒获取行情数据"`
+		Symbol   string `required:"true" default:"market.btcusdt.kline.1min" default:"K线类型"`
+		From     int64  `required:"true" default:1501174800 flagUsage:"socket获取数据开始时间戳"`
+		To       int64  `required:"true" default:1560355200 flagUsage:"socket获取数据结束时间戳"`
+		Duration int64  `required:"true" default:5 flagUsage:"每多少秒获取行情数据"`
+	}
+
+	Strategy struct {
+		Type     string `required:"true" default:"floating" flagUsage:"floating浮动买入"`
+		Floating struct {
+			TotalAmount float64 `required:"true" default:0.0 flagUsage:"总金额仓位"`
+			FloatRate   float64 `required:"true" default:0.01 flagUsage:"上下浮动的比例"`
+			Depth       int     `required:"true" default:8 flagUsage:"最多下降和上升多少次"`
+			Interval    int64   `required:"true" default:600 flagUsage:"间隔多少s再次启用策略"`
+		}
 	}
 
 	Log struct {

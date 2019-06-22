@@ -18,9 +18,15 @@ DB = "bitcoin"
     MaxOpen = 80
 
 [KLineData]
-From = 1514736000
-To = 1546272060
+From = 1544889060
+To = 1560614400
 Duration = 5
+
+[Strategy]
+Type = "floating"
+[Strategy.Floating]
+    StockPos = 10000.0
+    Depth = 8
 
 [Log]
 Type = "raw"

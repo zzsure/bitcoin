@@ -6,10 +6,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/satori/go.uuid"
 	"gitlab.azbit.cn/web/bitcoin/library/util/net"
 )
+
+func GetTodayDay() string {
+	var cstSh, _ = time.LoadLocation("Asia/Shanghai")
+	day := time.Now().In(cstSh).Format("2006-01-02")
+	return day
+}
+
+func GetTodayDayByUnix(s int64) string {
+	var cstSh, _ = time.LoadLocation("Asia/Shanghai")
+	str := time.Unix(s, 0).In(cstSh).Format("2006-01-02T15:04:05Z07:00")
+	return str
+}
 
 func GenUUID() string {
 	return uuid.NewV4().String()

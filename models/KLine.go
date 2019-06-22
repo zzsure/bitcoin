@@ -28,3 +28,11 @@ type KLineReturn struct {
 func (kld *KLineData) Save() error {
 	return db.DB.Save(kld).Error
 }
+
+// 按照币种，时间范围查找，时间排序k线
+func GetKLineDataByTime(symbol string, start, end int64) ([]*KLineData, error) {
+	//TODO: start end 判断
+	var klds []*KLineData
+	err := db.DB.Where("ch = ? and ts >= ? and ts <= ?", symbol, start, end).Order("ts asc").Find(&klds).Error
+	return klds, err
+}

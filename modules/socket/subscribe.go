@@ -2,6 +2,7 @@ package socket
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -54,7 +55,7 @@ type ReqMsg struct {
 func sendSubMsg(c *websocket.Conn) error {
 	id := util.GenUUID()
 	msg := SubMsg{
-		Sub: "market.btcusdt.kline.1min",
+		Sub: conf.Config.KLineData.Symbol,
 		Id:  id,
 	}
 	subMsg, _ := json.Marshal(msg)
@@ -66,12 +67,13 @@ func sendSubMsg(c *websocket.Conn) error {
 func sendReqMsg(c *websocket.Conn, id int64) error {
 	//id := util.GenUUID()
 	to := id + 300*60
+	idstr := strconv.FormatInt(to, 10)
 	if to > conf.Config.KLineData.To {
 		to = conf.Config.KLineData.To
 	}
 	msg := ReqMsg{
-		Req:  "market.btcusdt.kline.1min",
-		Id:   util.GenUUID(),
+		Req:  conf.Config.KLineData.Symbol,
+		Id:   idstr,
 		From: id,
 		To:   to,
 	}
@@ -141,6 +143,8 @@ func dealMsg(c *websocket.Conn) {
 						ts = kld.Kid
 						saveKLineData(&kld, ch, ts)
 					}
+				} else {
+					ts, _ = strconv.ParseInt(data.Id, 10, 64)
 				}
 				ts = ts + 60
 				if ts > conf.Config.KLineData.To {
