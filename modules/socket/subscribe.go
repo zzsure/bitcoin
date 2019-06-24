@@ -25,6 +25,8 @@ type PingMsg struct {
 	Data   []PingKLine `json:"data"`
 }
 
+var lastPingMsg PingMsg
+
 type PingKLine struct {
 	Kid    int64   `json:"id"`     // K线ID
 	Amount float64 `json:"amount"` // 成交量
@@ -157,10 +159,13 @@ func dealMsg(c *websocket.Conn) {
 					logger.Error("write req:", err)
 				}
 			} else if data.Ch != "" {
-				saveKLineData(&data.KLine, data.Ch, data.Ts)
+                if lastPingMsg.Ts != 0 && lastPingMsg.KLine.Kid != data.KLine.Kid {
+				    saveKLineData(&lastPingMsg.KLine, lastPingMsg.Ch, lastPingMsg.KLine.Kid)
+                }
+                lastPingMsg = data
 			} else {
-				logger.Error("not sub and not req")
-				return
+				logger.Error("not sub and not req return data")
+				//return
 			}
 		}
 	}
@@ -174,14 +179,14 @@ func Init() {
 	}
 	logger.Info("connect huobi success")
 
-	/*err = sendSubMsg(c)
+	err = sendSubMsg(c)
 	  if err != nil {
 	      logger.Error("write sub:", err)
-	  }*/
-	err = sendReqMsg(c, conf.Config.KLineData.From)
+	}
+	/*err = sendReqMsg(c, conf.Config.KLineData.From)
 	if err != nil {
 		logger.Error("write req:", err)
-	}
+	}*/
 
 	defer c.Close()
 

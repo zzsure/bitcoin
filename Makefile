@@ -19,7 +19,8 @@ docker-build:
 	cd run && \
 	cp $(BIN) ../build/ && \
 	cd ../build && \
-	docker build -t zzsure/bitcoin:$(TAG) . && \
-	docker push zzsure/bitcoin:$(TAG)
+	docker build -t zzsure/bitcoin:$(TAG) . 
+	#&& \
+	#docker push zzsure/bitcoin:$(TAG)
 
 .PHONY: build

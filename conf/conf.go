@@ -8,6 +8,30 @@ import (
 	"gitlab.azbit.cn/web/bitcoin/library/util"
 )
 
+// API KEY
+const (
+	// todo: replace with your own AccessKey and Secret Key
+	ACCESS_KEY string = "5afb5e96-4dbafee5-rbr45t6yr4-85648"
+	SECRET_KEY string = "92866f0a-fb065c84-dda0dceb-92744"
+
+	// default to be disabled, please DON'T enable it unless it's officially announced.
+	ENABLE_PRIVATE_SIGNATURE bool = false
+
+	// generated the key by: openssl ecparam -name prime256v1 -genkey -noout -out privatekey.pem
+	// only required when Private Signature is enabled
+	// todo: replace with your own PrivateKey from privatekey.pem
+	PRIVATE_KEY_PRIME_256 string = `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+    ACCOUNT_ID = "8806108"
+)
+
+// API请求地址, 不要带最后的/
+const (
+	//todo: replace with real URLs and HostName
+	MARKET_URL string = "https://api.huobi.pro"
+	TRADE_URL  string = "https://api.huobi.pro"
+	HOST_NAME  string = "api.huobi.pro"
+)
+
 type ConfigTOML struct {
 	Server struct {
 		Listen             string         `required:"true" flagUsage:"服务监听地址"`
