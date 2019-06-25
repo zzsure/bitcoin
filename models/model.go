@@ -24,6 +24,7 @@ func CreateTable() {
 	_db.CreateTable(&KLineData{})
 	_db.CreateTable(&Order{})
 	_db.CreateTable(&Profit{})
+	_db.CreateTable(&Strategy{})
 }
 
 func MigrateTable() {
@@ -32,4 +33,5 @@ func MigrateTable() {
 	_db.AutoMigrate(&KLineData{})
 	_db.AutoMigrate(&Order{})
 	_db.AutoMigrate(&Profit{})
+	_db.AutoMigrate(&Strategy{})
 }

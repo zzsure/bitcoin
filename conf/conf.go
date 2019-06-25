@@ -8,12 +8,7 @@ import (
 	"gitlab.azbit.cn/web/bitcoin/library/util"
 )
 
-// API KEY
 const (
-	// todo: replace with your own AccessKey and Secret Key
-	ACCESS_KEY string = "5afb5e96-4dbafee5-rbr45t6yr4-85648"
-	SECRET_KEY string = "92866f0a-fb065c84-dda0dceb-92744"
-
 	// default to be disabled, please DON'T enable it unless it's officially announced.
 	ENABLE_PRIVATE_SIGNATURE bool = false
 
@@ -66,16 +61,6 @@ type ConfigTOML struct {
 		From     int64  `required:"true" default:1501174800 flagUsage:"socket获取数据开始时间戳"`
 		To       int64  `required:"true" default:1560355200 flagUsage:"socket获取数据结束时间戳"`
 		Duration int64  `required:"true" default:5 flagUsage:"每多少秒获取行情数据"`
-	}
-
-	Strategy struct {
-		Type     string `required:"true" default:"floating" flagUsage:"floating浮动买入"`
-		Floating struct {
-			TotalAmount float64 `required:"true" default:0.0 flagUsage:"总金额仓位"`
-			FloatRate   float64 `required:"true" default:0.01 flagUsage:"上下浮动的比例"`
-			Depth       int     `required:"true" default:8 flagUsage:"最多下降和上升多少次"`
-			Interval    int64   `required:"true" default:600 flagUsage:"间隔多少s再次启用策略"`
-		}
 	}
 
 	Log struct {

@@ -184,11 +184,11 @@ func GetTimestamp() models.TimestampReturn {
 
 // 查询当前用户的所有账户, 根据包含的私钥查询
 // return: AccountsReturn对象
-func GetAccounts() models.AccountsReturn {
+func GetAccounts(strategy models.Strategy) models.AccountsReturn {
 	accountsReturn := models.AccountsReturn{}
 
 	strRequest := "/v1/account/accounts"
-	jsonAccountsReturn := huobi_util.ApiKeyGet(make(map[string]string), strRequest)
+	jsonAccountsReturn := huobi_util.ApiKeyGet(strategy, make(map[string]string), strRequest)
     logger.Info("get accounts: ", jsonAccountsReturn)
 	json.Unmarshal([]byte(jsonAccountsReturn), &accountsReturn)
 
@@ -198,11 +198,11 @@ func GetAccounts() models.AccountsReturn {
 // 根据账户ID查询账户余额
 // nAccountID: 账户ID, 不知道的话可以通过GetAccounts()获取, 可以只现货账户, C2C账户, 期货账户
 // return: BalanceReturn对象
-func GetAccountBalance(strAccountID string) models.BalanceReturn {
+func GetAccountBalance(strategy models.Strategy, strAccountID string) models.BalanceReturn {
 	balanceReturn := models.BalanceReturn{}
 
 	strRequest := fmt.Sprintf("/v1/account/accounts/%s/balance", strAccountID)
-	jsonBanlanceReturn := huobi_util.ApiKeyGet(make(map[string]string), strRequest)
+	jsonBanlanceReturn := huobi_util.ApiKeyGet(strategy, make(map[string]string), strRequest)
 	json.Unmarshal([]byte(jsonBanlanceReturn), &balanceReturn)
 
 	return balanceReturn
@@ -214,7 +214,7 @@ func GetAccountBalance(strAccountID string) models.BalanceReturn {
 // 下单
 // placeRequestParams: 下单信息
 // return: PlaceReturn对象
-func Place(placeRequestParams models.PlaceRequestParams) models.PlaceReturn {
+func Place(strategy models.Strategy, placeRequestParams models.PlaceRequestParams) models.PlaceReturn {
 	placeReturn := models.PlaceReturn{}
 
 	mapParams := make(map[string]string)
@@ -230,7 +230,7 @@ func Place(placeRequestParams models.PlaceRequestParams) models.PlaceReturn {
 	mapParams["type"] = placeRequestParams.Type
 
 	strRequest := "/v1/order/orders/place"
-	jsonPlaceReturn := huobi_util.ApiKeyPost(mapParams, strRequest)
+	jsonPlaceReturn := huobi_util.ApiKeyPost(strategy, mapParams, strRequest)
 	json.Unmarshal([]byte(jsonPlaceReturn), &placeReturn)
 
 	return placeReturn
@@ -239,22 +239,22 @@ func Place(placeRequestParams models.PlaceRequestParams) models.PlaceReturn {
 // 申请撤销一个订单请求
 // strOrderID: 订单ID
 // return: PlaceReturn对象
-func SubmitCancel(strOrderID string) models.PlaceReturn {
+func SubmitCancel(strategy models.Strategy, strOrderID string) models.PlaceReturn {
 	placeReturn := models.PlaceReturn{}
 
 	strRequest := fmt.Sprintf("/v1/order/orders/%s/submitcancel", strOrderID)
-	jsonPlaceReturn := huobi_util.ApiKeyPost(make(map[string]string), strRequest)
+	jsonPlaceReturn := huobi_util.ApiKeyPost(strategy, make(map[string]string), strRequest)
 	json.Unmarshal([]byte(jsonPlaceReturn), &placeReturn)
 
 	return placeReturn
 }
 
 // 查询订单详情
-func PlaceDetail(strOrderID string) models.PlaceDetailReturn {
+func PlaceDetail(strategy models.Strategy, strOrderID string) models.PlaceDetailReturn {
     placeDetailReturn := models.PlaceDetailReturn{}
 
 	strRequest := fmt.Sprintf("/v1/order/orders/%s", strOrderID)
-	jsonPlaceReturn := huobi_util.ApiKeyGet(make(map[string]string), strRequest)
+	jsonPlaceReturn := huobi_util.ApiKeyGet(strategy, make(map[string]string), strRequest)
     json.Unmarshal([]byte(jsonPlaceReturn), &placeDetailReturn)
 
     return placeDetailReturn

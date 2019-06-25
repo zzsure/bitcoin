@@ -1,5 +1,5 @@
 [Server]
-Listen = ":81"
+Listen = ":6130"
 Env = "Dev"
 MaxHttpRequestBody = 4
 
@@ -23,18 +23,9 @@ SaleRates = 0.002
 
 [KLineData]
 Symbol = "market.btcusdt.kline.1min"
-From = 1509465660
-To = 1560614400
+From = 1560614400
+To = 1561384680
 Duration = 5
-
-[Strategy]
-Type = "floating"
-[Strategy.Floating]
-    TotalAmount = 100000.0
-    FloatRate = 0.02
-    Depth = 4
-    Interval = 18000
 
 [Log]
 Type = "raw"
-

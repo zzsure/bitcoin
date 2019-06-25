@@ -16,11 +16,11 @@ init:
 	cd run && TARGET='run' ARG='init' docker-compose run --rm bitcoin-devel
 
 docker-build:
-	cd run && \
-	cp $(BIN) ../build/ && \
+	#cd run && \
+	#TARGET='build' docker-compose run --rm bitcoin-devel && 
+	cd run && cp $(BIN) ../build/ && \
 	cd ../build && \
-	docker build -t zzsure/bitcoin:$(TAG) . 
-	#&& \
-	#docker push zzsure/bitcoin:$(TAG)
+	docker build -t zzsure/bitcoin:$(TAG) . && \
+	docker push zzsure/bitcoin:$(TAG)
 
 .PHONY: build

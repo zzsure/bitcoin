@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"gitlab.azbit.cn/web/bitcoin/conf"
+	"gitlab.azbit.cn/web/bitcoin/models"
 )
 
 // Http Get请求基础函数, 通过封装Go语言Http请求, 支持火币网REST API的HTTP Get请求
@@ -92,17 +93,17 @@ func HttpPostRequest(strUrl string, mapParams map[string]string) string {
 // mapParams: map类型的请求参数, key:value
 // strRequest: API路由路径
 // return: 请求结果
-func ApiKeyGet(mapParams map[string]string, strRequestPath string) string {
+func ApiKeyGet(strategy models.Strategy, mapParams map[string]string, strRequestPath string) string {
 	strMethod := "GET"
 	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05")
 
-	mapParams["AccessKeyId"] = conf.ACCESS_KEY
+	mapParams["AccessKeyId"] = strategy.AccessKey
 	mapParams["SignatureMethod"] = "HmacSHA256"
 	mapParams["SignatureVersion"] = "2"
 	mapParams["Timestamp"] = timestamp
 
 	hostName := conf.HOST_NAME
-	mapParams["Signature"] = CreateSign(mapParams, strMethod, hostName, strRequestPath, conf.SECRET_KEY)
+	mapParams["Signature"] = CreateSign(mapParams, strMethod, hostName, strRequestPath, strategy.SecretKey)
 
 	if conf.ENABLE_PRIVATE_SIGNATURE == true {
 		privateSignature, err := CreatePrivateSignByJWT(mapParams["Signature"])
@@ -122,19 +123,19 @@ func ApiKeyGet(mapParams map[string]string, strRequestPath string) string {
 // mapParams: map类型的请求参数, key:value
 // strRequest: API路由路径
 // return: 请求结果
-func ApiKeyPost(mapParams map[string]string, strRequestPath string) string {
+func ApiKeyPost(strategy models.Strategy, mapParams map[string]string, strRequestPath string) string {
 	strMethod := "POST"
 	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05")
 
 	mapParams2Sign := make(map[string]string)
-	mapParams2Sign["AccessKeyId"] = conf.ACCESS_KEY
+	mapParams2Sign["AccessKeyId"] = strategy.AccessKey
 	mapParams2Sign["SignatureMethod"] = "HmacSHA256"
 	mapParams2Sign["SignatureVersion"] = "2"
 	mapParams2Sign["Timestamp"] = timestamp
 
 	hostName := conf.HOST_NAME
 
-	mapParams2Sign["Signature"] = CreateSign(mapParams2Sign, strMethod, hostName, strRequestPath, conf.SECRET_KEY)
+	mapParams2Sign["Signature"] = CreateSign(mapParams2Sign, strMethod, hostName, strRequestPath, strategy.SecretKey)
 
 	if conf.ENABLE_PRIVATE_SIGNATURE == true {
 		privateSignature, err := CreatePrivateSignByJWT(mapParams2Sign["Signature"])

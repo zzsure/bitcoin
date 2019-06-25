@@ -8,8 +8,8 @@ import (
 	"gitlab.azbit.cn/web/bitcoin/library/db"
 	"gitlab.azbit.cn/web/bitcoin/library/log"
 	"gitlab.azbit.cn/web/bitcoin/middleware"
-	"gitlab.azbit.cn/web/bitcoin/modules/socket"
-	"gitlab.azbit.cn/web/bitcoin/modules/strategy/floating"
+	//"gitlab.azbit.cn/web/bitcoin/modules/socket"
+	"gitlab.azbit.cn/web/bitcoin/modules/strategy"
 )
 
 var Server = cli.Command{
@@ -34,8 +34,8 @@ func run(c *cli.Context) {
 	conf.Init(c.String("conf"), c.String("args"))
 	log.Init()
 	db.Init()
-	socket.Init()
-	floating.Init()
+	//socket.Init()
+	strategy.Init()
 
 	GinEngine().Run(conf.Config.Server.Listen)
 }
