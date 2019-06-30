@@ -10,6 +10,7 @@ import (
 	"gitlab.azbit.cn/web/bitcoin/conf"
 	"gitlab.azbit.cn/web/bitcoin/library/util"
 	"gitlab.azbit.cn/web/bitcoin/models"
+	"gitlab.azbit.cn/web/bitcoin/modules/strategy"
 )
 
 var logger = logging.MustGetLogger("modules/socket")
@@ -159,10 +160,24 @@ func dealMsg(c *websocket.Conn) {
 					logger.Error("write req:", err)
 				}
 			} else if data.Ch != "" {
-                if lastPingMsg.Ts != 0 && lastPingMsg.KLine.Kid != data.KLine.Kid {
-				    saveKLineData(&lastPingMsg.KLine, lastPingMsg.Ch, lastPingMsg.KLine.Kid)
-                }
-                lastPingMsg = data
+				if lastPingMsg.Ts != 0 && lastPingMsg.KLine.Kid != data.KLine.Kid {
+					saveKLineData(&lastPingMsg.KLine, lastPingMsg.Ch, lastPingMsg.KLine.Kid)
+				}
+				lastPingMsg = data
+				// 应用策略
+				kld := &models.KLineData{
+					Kid:    data.KLine.Kid,
+					Amount: data.KLine.Amount,
+					Count:  data.KLine.Count,
+					Open:   data.KLine.Open,
+					Close:  data.KLine.Close,
+					Low:    data.KLine.Low,
+					High:   data.KLine.High,
+					Vol:    data.KLine.Vol,
+					Ts:     data.KLine.Kid,
+					Ch:     data.Ch,
+				}
+				strategy.StrategyDeal(kld)
 			} else {
 				logger.Error("not sub and not req return data")
 				//return
@@ -180,8 +195,8 @@ func Init() {
 	logger.Info("connect huobi success")
 
 	err = sendSubMsg(c)
-	  if err != nil {
-	      logger.Error("write sub:", err)
+	if err != nil {
+		logger.Error("write sub:", err)
 	}
 	/*err = sendReqMsg(c, conf.Config.KLineData.From)
 	if err != nil {

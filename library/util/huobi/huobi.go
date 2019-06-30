@@ -254,4 +254,3 @@ func ComputeHmac256(strMessage string, strSecret string) string {
 
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
-

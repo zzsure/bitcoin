@@ -7,8 +7,9 @@ import (
 
 	"github.com/op/go-logging"
 	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/models"
+	"gitlab.azbit.cn/web/bitcoin/library/util"
 	"gitlab.azbit.cn/web/bitcoin/library/util/huobi"
+	"gitlab.azbit.cn/web/bitcoin/models"
 )
 
 var logger = logging.MustGetLogger("modules/huobi")
@@ -189,7 +190,7 @@ func GetAccounts(strategy models.Strategy) models.AccountsReturn {
 
 	strRequest := "/v1/account/accounts"
 	jsonAccountsReturn := huobi_util.ApiKeyGet(strategy, make(map[string]string), strRequest)
-    logger.Info("get accounts: ", jsonAccountsReturn)
+	logger.Info("get accounts: ", jsonAccountsReturn)
 	json.Unmarshal([]byte(jsonAccountsReturn), &accountsReturn)
 
 	return accountsReturn
@@ -198,14 +199,24 @@ func GetAccounts(strategy models.Strategy) models.AccountsReturn {
 // 根据账户ID查询账户余额
 // nAccountID: 账户ID, 不知道的话可以通过GetAccounts()获取, 可以只现货账户, C2C账户, 期货账户
 // return: BalanceReturn对象
-func GetAccountBalance(strategy models.Strategy, strAccountID string) models.BalanceReturn {
+func GetAccountBalance(strategy models.Strategy) models.BalanceReturn {
 	balanceReturn := models.BalanceReturn{}
 
-	strRequest := fmt.Sprintf("/v1/account/accounts/%s/balance", strAccountID)
+	strRequest := fmt.Sprintf("/v1/account/accounts/%s/balance", strategy.AccountID)
 	jsonBanlanceReturn := huobi_util.ApiKeyGet(strategy, make(map[string]string), strRequest)
 	json.Unmarshal([]byte(jsonBanlanceReturn), &balanceReturn)
 
 	return balanceReturn
+}
+
+func GetCurrencyBalance(strategy models.Strategy, currency string) float64 {
+	br := GetAccountBalance(strategy)
+	for _, sa := range br.Data.List {
+		if sa.Currency == currency && sa.Type == "trade" {
+			return util.StringToFloat64(sa.Balance)
+		}
+	}
+	return 0.0
 }
 
 //------------------------------------------------------------------------------------------
@@ -251,11 +262,11 @@ func SubmitCancel(strategy models.Strategy, strOrderID string) models.PlaceRetur
 
 // 查询订单详情
 func PlaceDetail(strategy models.Strategy, strOrderID string) models.PlaceDetailReturn {
-    placeDetailReturn := models.PlaceDetailReturn{}
+	placeDetailReturn := models.PlaceDetailReturn{}
 
 	strRequest := fmt.Sprintf("/v1/order/orders/%s", strOrderID)
 	jsonPlaceReturn := huobi_util.ApiKeyGet(strategy, make(map[string]string), strRequest)
-    json.Unmarshal([]byte(jsonPlaceReturn), &placeDetailReturn)
+	json.Unmarshal([]byte(jsonPlaceReturn), &placeDetailReturn)
 
-    return placeDetailReturn
+	return placeDetailReturn
 }

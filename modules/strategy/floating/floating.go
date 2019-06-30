@@ -5,125 +5,129 @@ import (
 	"errors"
 	"fmt"
 	"math"
-    "strconv"
+	"time"
 
 	"github.com/op/go-logging"
 	"gitlab.azbit.cn/web/bitcoin/conf"
 	"gitlab.azbit.cn/web/bitcoin/library/util"
-	"gitlab.azbit.cn/web/bitcoin/modules/huobi"
 	"gitlab.azbit.cn/web/bitcoin/models"
+	"gitlab.azbit.cn/web/bitcoin/modules/huobi"
 )
 
 var logger = logging.MustGetLogger("modules/socket")
 
-var orderList []*models.Order
-var totalAmount float64
-var depth int
-var lastSettle int64 // 上次结算时间
+type StrategyProcess struct {
+	Strategy    models.Strategy
+	OrderList   []*models.Order
+	TotalAmount float64
+	Depth       int
+	LastSettle  int64 // 上次结算时间
+}
+
+var spMap map[uint]*StrategyProcess
+
+// TODO: 下单没成单的处理
 
 func Init(strategy models.Strategy) {
-	logger.Info("get all klds begin...")
-	//place_order("btcusdt", "buy-limit", 6666.66, 0.01)
-    //huobi.SubmitCancel("37919339092")
-    //placeDetail := huobi.PlaceDetail("37919339092")
-    accounts := huobi.GetAccounts(strategy)
-    logger.Info("accounts: ", accounts)
-}
-
-func place_order(strategy models.Strategy, symobol, orderType string, price, amount float64) {
-    var placeParams models.PlaceRequestParams
-	placeParams.AccountID = strategy.AccountID
-	placeParams.Amount = strconv.FormatFloat(amount, 'f', -1, 64)
-	placeParams.Price = strconv.FormatFloat(price, 'f', -1, 64)
-	placeParams.Source = "api"
-	placeParams.Symbol = symobol
-	placeParams.Type = orderType
-    logger.Info("Place order with: ", placeParams)
-    placeReturn := huobi.Place(strategy, placeParams)
-    if placeReturn.Status == "ok" {
-		logger.Info("Place return: ", placeReturn.Data)
-	} else {
-		logger.Error("Place error: ", placeReturn.ErrMsg)
+	if nil == spMap {
+		spMap = make(map[uint]*StrategyProcess)
+	}
+	// 查询历史订单
+	ol, err := models.GetOrdersByStatus(strategy.ID, models.OrderStatusSuccess)
+	if err != nil {
+		logger.Error("get order by status err:", err)
+	}
+	logger.Info("history order num:", len(ol))
+	ta := huobi.GetCurrencyBalance(strategy, "usdt")
+	ta = 30.0
+	logger.Info("account:", strategy.AccountID, ", balance:", ta)
+	d := 0
+	for _, o := range ol {
+		if o.Type == models.OrderTypeBuy && o.Status == models.OrderStatusSuccess {
+			ta -= o.Money
+		} else if o.Type == models.OrderTypeSale && o.Status == models.OrderStatusSuccess {
+			d++
+		}
+	}
+	// TODO:未成单的处理
+	spMap[strategy.ID] = &StrategyProcess{
+		Strategy:    strategy,
+		OrderList:   ol,
+		TotalAmount: ta,
+		Depth:       d,
+		LastSettle:  0,
 	}
 }
 
-func start(strategy models.Strategy, klds []*models.KLineData, d int, r float64) {
-	logger.Info("d is : ", d, " r is: ", r)
-	for idx, kld := range klds {
-		if totalAmount <= 0.0 {
-			logger.Error("blowing up...")
-			return
-		}
-		if depth == 0 && len(orderList) == 0 {
-			if kld.Ts-lastSettle < strategy.Interval {
-				logger.Info("just wait interval k line buy...")
-				continue
-			}
-			//orderList := make([]*models.Order, conf.Config.Strategy.Floating.Depth)
-			orderList = make([]*models.Order, 0)
-			err := order(strategy, kld.Open, models.OrderTypeBuy, kld.Ts)
-			if err != nil {
-				logger.Error("order fail: ", err)
-			}
-		}
-		err := strategyDeal(strategy, kld)
+func StrategyDeal(kld *models.KLineData) {
+	logger.Info("come in deal kline")
+	for _, sp := range spMap {
+		/*orderDetail := huobi.PlaceDetail(sp.Strategy, "38795364910")
+		  info, _ := json.Marshal(orderDetail)
+		  logger.Info("order detail:", string(info))
+		  ta := huobi.GetCurrencyBalance(sp.Strategy, "btc")
+		  logger.Info("account:", sp.Strategy.AccountID, ", balance:", ta)*/
+		logger.Info("strategy:", sp.Strategy.Name, " timestamp:", kld.Ts)
+		err := strategyProcessDeal(sp, kld)
 		if err != nil {
-			logger.Error("strategy fail: ", err)
-		}
-		if idx == (len(klds)-1) && len(orderList) > 0 {
-			i := len(orderList) - 1
-			o := orderList[i]
-			if models.OrderTypeBuy == o.Type {
-				err := order(strategy, kld.High, models.OrderTypeSale, kld.Ts)
-				if err != nil {
-					logger.Error("order sale fail: ", err)
-				}
-				settle(strategy)
-			}
+			logger.Error("strategy process deal err:", err)
 		}
 	}
 }
 
-func strategyDeal(strategy models.Strategy, kld *models.KLineData) error {
-	if len(orderList) == 0 {
-		return errors.New("no order can use strategy")
+func strategyProcessDeal(sp *StrategyProcess, kld *models.KLineData) error {
+	if sp.TotalAmount <= 5.0 {
+		return errors.New("no fund")
 	}
-	//logger.Info("strategy k line...high price:", kld.High, " low price:", kld.Low)
-	idx := len(orderList) - 1
-	o := orderList[idx]
-	lowPrice := (1.0 - strategy.FloatRate) * o.Price
+	if sp.Depth == 0 && len(sp.OrderList) == 0 {
+		if kld.Ts-sp.LastSettle < sp.Strategy.Interval {
+			return errors.New("just wait interval k line buy...")
+		}
+		sp.OrderList = make([]*models.Order, 0)
+		err := order(sp, kld.Open, models.OrderTypeBuy, kld.Ts)
+		if err != nil {
+			return err
+		}
+	}
+	idx := len(sp.OrderList) - 1
+	o := sp.OrderList[idx]
+	lowPrice := (1.0 - sp.Strategy.FloatRate) * o.Price
 	if models.OrderTypeBuy == o.Type {
-		expectIncome := o.Amount * kld.High
-		for _, o := range orderList {
+		expectIncome := util.Float64Precision(o.Amount, 4, false) * kld.High
+		logger.Info("expect income money is:", expectIncome)
+		for _, o := range sp.OrderList {
 			if models.OrderTypeBuy == o.Type {
 				expectIncome -= o.Money
 			} else if models.OrderTypeSale == o.Type {
 				expectIncome += o.Money
 			}
 		}
-		if expectIncome > o.Money*(1 + strategy.FloatRate) {
+		logger.Info("expect income money cal is:", expectIncome)
+		logger.Info("expect o.money is:", o.Money*sp.Strategy.FloatRate)
+		if expectIncome > o.Money*sp.Strategy.FloatRate {
 			// 卖出盈利结算，复位
-			err := order(strategy, kld.High, models.OrderTypeSale, kld.Ts)
+			err := order(sp, kld.High, models.OrderTypeSale, kld.Ts)
 			if err != nil {
 				return err
 			}
-			return settle(strategy)
+			return settle(sp)
 		}
-		if depth < (strategy.Depth-1) && kld.Low <= lowPrice {
+		logger.Info("kld low price:", kld.Low, " unexpect low price:", lowPrice)
+		if sp.Depth < (sp.Strategy.Depth-1) && kld.Low <= lowPrice {
 			// 卖出止损，depth+1，缓存interval再买入
-			err := order(strategy, lowPrice, models.OrderTypeSale, kld.Ts)
+			err := order(sp, lowPrice, models.OrderTypeSale, kld.Ts)
 			if err != nil {
 				return err
 			}
-			if depth >= strategy.Depth - 1 {
-				settle(strategy)
+			if sp.Depth >= sp.Strategy.Depth-1 {
+				settle(sp)
 				return errors.New("no enough fund")
 			}
-			depth += 1
+			sp.Depth += 1
 		}
 	} else if models.OrderTypeSale == o.Type {
-		if kld.Ts-o.Ts >= strategy.Interval {
-			err := order(strategy, kld.Open, models.OrderTypeBuy, kld.Ts)
+		if kld.Ts-o.Ts >= sp.Strategy.Interval {
+			err := order(sp, kld.Open, models.OrderTypeBuy, kld.Ts)
 			if err != nil {
 				return err
 			}
@@ -134,74 +138,30 @@ func strategyDeal(strategy models.Strategy, kld *models.KLineData) error {
 	return nil
 }
 
-func settle(strategy models.Strategy) error {
-	reason := fmt.Sprintf("depth%d", depth)
-	if depth >= strategy.Depth {
-		reason = "nofund"
-	}
-	capital := 0.0
-	income := 0.0
-	fee := 0.0
-	ids := make([]uint, len(orderList))
-	for idx, o := range orderList {
-		if models.OrderTypeBuy == o.Type {
-			capital += o.Money
-		} else if models.OrderTypeSale == o.Type {
-			income += o.Money
-		}
-		fee += o.Fee
-		lastSettle = o.Ts
-		ids[idx] = o.ID
-	}
-	idsByte, _ := json.Marshal(ids)
-	depth = 0
-	//TODO:不太合理
-	orderList = make([]*models.Order, 0)
-	p := &models.Profit{
-		Strategy:    strategy.Name,
-		TotalAmount: strategy.TotalAmount,
-		Depth:       strategy.Depth,
-		FloatRate:   strategy.FloatRate,
-		Capital:     capital,
-		InCome:      income,
-		Fee:         fee,
-		Profit:      income - capital,
-		Reason:      reason,
-		Day:         util.GetTodayDay(),
-		Orders:      string(idsByte),
-	}
-	totalAmount = totalAmount + income - capital
-	if totalAmount > strategy.TotalAmount {
-		totalAmount = strategy.TotalAmount
-	}
-	err := p.Save()
-	return err
-}
-
-func order(strategy models.Strategy, price float64, orderType int, ts int64) error {
-	logger.Info("current depth: ", depth, "price: ", price, " ts: ", ts, "and type: ", orderType)
+func order(sp *StrategyProcess, price float64, orderType int, ts int64) error {
+	logger.Info("current depth: ", sp.Depth, "price: ", price, " ts: ", ts, "and type: ", orderType)
 	money := 0.0
 	fee := 0.0
 	amount := 0.0
 	if models.OrderTypeSale == orderType {
-		if len(orderList) == 0 {
+		if len(sp.OrderList) == 0 {
 			return errors.New("no order can sale")
 		}
-		idx := len(orderList) - 1
-		o := orderList[idx]
+		idx := len(sp.OrderList) - 1
+		o := sp.OrderList[idx]
 		if models.OrderTypeBuy != o.Type {
 			return errors.New("last order is not buy")
 		}
-		fee = price * o.Amount * conf.Config.Huobi.SaleRates
-		money = price*o.Amount - fee
-		amount = o.Amount
+		fee = price * util.Float64Precision(o.Amount, 4, false) * conf.Config.Huobi.SaleRates
+		money = price*util.Float64Precision(o.Amount, 4, false) - fee
+		amount = util.Float64Precision(o.Amount, 4, false)
 	} else if models.OrderTypeBuy == orderType {
-		per := totalAmount / (math.Pow(2, float64(strategy.Depth)) - 1.0)
-		money = math.Pow(2, float64(depth)) * per
+		per := sp.TotalAmount / (math.Pow(2, float64(sp.Strategy.Depth)) - 1.0)
+		money = math.Pow(2, float64(sp.Depth)) * per
 		// 最后一次把余额都拿出来
-		if depth == strategy.Depth - 1 {
-			money = totalAmount
-			for _, o := range orderList {
+		if sp.Depth == sp.Strategy.Depth-1 {
+			money = sp.TotalAmount
+			for _, o := range sp.OrderList {
 				if models.OrderTypeBuy == o.Type {
 					money -= o.Money
 				}
@@ -212,18 +172,173 @@ func order(strategy models.Strategy, price float64, orderType int, ts int64) err
 		amount -= amount * conf.Config.Huobi.BuyRates
 	}
 	logger.Info("current money: ", money, "amount: ", amount, " fee: ", fee)
-	// 模拟下单即买入
-	o := &models.Order{
-		Strategy: strategy.Name,
-		Money:    money,
-		Price:    price,
-		Amount:   amount,
-		Fee:      fee,
-		Type:     orderType,
-		Status:   models.OrderStatusSuccess, // 模拟下单即买入
-		Ts:       ts,
+	var externalID string
+	var err error
+	// 火币下单
+	if models.OrderTypeBuy == orderType {
+		externalID, err = placeOrder(sp, "btcusdt", "buy-market", money)
+	} else if models.OrderTypeSale == orderType {
+		externalID, err = placeOrder(sp, "btcusdt", "sell-market", amount)
+		//externalID, err = placeOrder(sp, "btcusdt", "sell-market", "0.0008"amount)
 	}
-	err := o.Save()
-	orderList = append(orderList, o)
+	if err != nil {
+		return err
+	}
+	o := &models.Order{
+		StrategyID:    sp.Strategy.ID,
+		Money:         money,
+		Price:         price,
+		Amount:        amount,
+		Fee:           fee,
+		Type:          orderType,
+		Status:        models.OrderStatusBuy, // 模拟下单即买入
+		Ts:            ts,
+		ExternalID:    "",
+		RefrencePrice: price,
+	}
+	err = o.Save()
+	if err != nil {
+		return err
+	}
+	// 查询订单详情，TODO:好的检查策略
+	orderDetail := huobi.PlaceDetail(sp.Strategy, externalID)
+	for orderDetail.Data.State != "filled" {
+		logger.Error("wait order not filled:", orderDetail)
+		time.Sleep(time.Duration(5) * time.Second)
+		orderDetail = huobi.PlaceDetail(sp.Strategy, externalID)
+		logger.Info("order detail:", orderDetail)
+	}
+	//o.Price = util.StringToFloat64(orderDetail.Data.Price)
+	fieldAmount := util.StringToFloat64(orderDetail.Data.FieldAmount)
+	fieldFees := util.StringToFloat64(orderDetail.Data.FieldFees)
+	fieldCashAmount := util.StringToFloat64(orderDetail.Data.FieldCashAmount)
+	if models.OrderTypeBuy == orderType {
+		o.Money = fieldCashAmount
+		// 已成交数量-已成交手续费
+		o.Amount = fieldAmount - fieldFees
+		// 已成交总金额/已成交数量
+		o.Price = fieldCashAmount / fieldAmount
+		o.Fee = fieldCashAmount * fieldFees / fieldAmount
+	} else if models.OrderTypeSale == orderType {
+		o.Money = fieldCashAmount - fieldFees
+		o.Amount = fieldAmount
+		o.Price = fieldCashAmount / fieldAmount
+		o.Fee = fieldFees
+	}
+	o.ExternalID = externalID
+	o.Status = models.OrderStatusSuccess
+	err = o.Save()
+	if err != nil {
+		return err
+	}
+
+	sp.OrderList = append(sp.OrderList, o)
 	return err
 }
+
+func placeOrder(sp *StrategyProcess, symobol, orderType string, amount float64) (string, error) {
+	var placeParams models.PlaceRequestParams
+	placeParams.AccountID = sp.Strategy.AccountID
+	placeParams.Amount = util.Float64ToString(amount)
+	//placeParams.Price = util.Float64ToString(price)
+	placeParams.Source = "api"
+	placeParams.Symbol = symobol
+	placeParams.Type = orderType
+	logger.Info("Place order with: ", placeParams)
+	placeReturn := huobi.Place(sp.Strategy, placeParams)
+	if placeReturn.Status == "ok" {
+		logger.Info("Place return: ", placeReturn.Data)
+		return placeReturn.Data, nil
+	} else {
+		logger.Error("Place error: ", placeReturn.ErrMsg)
+		return "", errors.New("place failed")
+	}
+}
+
+func settle(sp *StrategyProcess) error {
+	reason := fmt.Sprintf("depth%d", sp.Depth)
+	if sp.Depth >= sp.Strategy.Depth {
+		reason = "nofund"
+	}
+	capital := 0.0
+	income := 0.0
+	fee := 0.0
+	ids := make([]uint, len(sp.OrderList))
+	// TODO:改成事务
+	for idx, o := range sp.OrderList {
+		if models.OrderTypeBuy == o.Type {
+			capital += o.Money
+		} else if models.OrderTypeSale == o.Type {
+			income += o.Money
+		}
+		fee += o.Fee
+		sp.LastSettle = o.Ts
+		ids[idx] = o.ID
+		o.Status = models.OrderStatusSettle
+		err := o.Save()
+		if err != nil {
+			//logger.Error("settle order status err:", err)
+			return err
+		}
+	}
+	idsByte, _ := json.Marshal(ids)
+	sp.Depth = 0
+	//TODO:不太合理
+	sp.OrderList = make([]*models.Order, 0)
+	p := &models.Profit{
+		StrategyID:  sp.Strategy.ID,
+		TotalAmount: sp.Strategy.TotalAmount,
+		Depth:       sp.Strategy.Depth,
+		FloatRate:   sp.Strategy.FloatRate,
+		Capital:     capital,
+		InCome:      income,
+		Fee:         fee,
+		Profit:      income - capital,
+		Reason:      reason,
+		Day:         util.GetTodayDay(),
+		Orders:      string(idsByte),
+	}
+	sp.TotalAmount = huobi.GetCurrencyBalance(sp.Strategy, "usdt")
+	if sp.TotalAmount > sp.Strategy.TotalAmount {
+		sp.TotalAmount = sp.Strategy.TotalAmount
+	}
+	err := p.Save()
+	return err
+}
+
+/*func start(sp *StrategyProcess, klds []*models.KLineData, d int, r float64) {
+	logger.Info("d is : ", d, " r is: ", r)
+	for idx, kld := range klds {
+		if sp.TotalAmount <= 0.0 {
+			logger.Error("blowing up...")
+			return
+		}
+		if sp.Depth == 0 && len(sp.OrderList) == 0 {
+			if kld.Ts - sp.LastSettle < sp.Strategy.Interval {
+				logger.Info("just wait interval k line buy...")
+				continue
+			}
+			//orderList := make([]*models.Order, conf.Config.Strategy.Floating.Depth)
+			sp.OrderList = make([]*models.Order, 0)
+			err := order(sp, kld.Open, models.OrderTypeBuy, kld.Ts)
+			if err != nil {
+				logger.Error("order fail: ", err)
+			}
+		}
+		err := strategyProcessDeal(sp, kld)
+		if err != nil {
+			logger.Error("strategy fail: ", err)
+		}
+		if idx == (len(klds)-1) && len(sp.OrderList) > 0 {
+			i := len(sp.OrderList) - 1
+			o := sp.OrderList[i]
+			if models.OrderTypeBuy == o.Type {
+				err := order(sp, kld.High, models.OrderTypeSale, kld.Ts)
+				if err != nil {
+					logger.Error("order sale fail: ", err)
+				}
+				settle(sp)
+			}
+		}
+	}
+}*/

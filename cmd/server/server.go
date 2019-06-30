@@ -9,6 +9,7 @@ import (
 	"gitlab.azbit.cn/web/bitcoin/library/log"
 	"gitlab.azbit.cn/web/bitcoin/middleware"
 	//"gitlab.azbit.cn/web/bitcoin/modules/socket"
+	"gitlab.azbit.cn/web/bitcoin/modules/cron"
 	"gitlab.azbit.cn/web/bitcoin/modules/strategy"
 )
 
@@ -34,8 +35,9 @@ func run(c *cli.Context) {
 	conf.Init(c.String("conf"), c.String("args"))
 	log.Init()
 	db.Init()
-	//socket.Init()
 	strategy.Init()
+	//socket.Init()
+	cron.Init()
 
 	GinEngine().Run(conf.Config.Server.Listen)
 }

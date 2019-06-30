@@ -27,11 +27,7 @@ var lastSettle int64 // 上次结算时间
 )*/
 
 func Init() {
-	
-}
-
-func hitory() {
-    logger.Info("get all klds begin...")
+	logger.Info("get all klds begin...")
 	klds, err := models.GetKLineDataByTime(conf.Config.KLineData.Symbol, conf.Config.KLineData.From, conf.Config.KLineData.To)
 	logger.Info("get all klds end...")
 	if err != nil {
@@ -105,7 +101,7 @@ func strategy(kld *models.KLineData) error {
 				expectIncome += o.Money
 			}
 		}
-		if expectIncome > o.Money*(1+conf.Config.Strategy.Floating.FloatRate) {
+		if expectIncome > o.Money*conf.Config.Strategy.Floating.FloatRate {
 			// 卖出盈利结算，复位
 			err := order(kld.High, models.OrderTypeSale, kld.Ts)
 			if err != nil {
@@ -162,7 +158,7 @@ func settle() error {
 	//TODO:不太合理
 	orderList = make([]*models.Order, 0)
 	p := &models.Profit{
-		Strategy:    conf.Config.Strategy.Type,
+		StrategyID:  1,
 		TotalAmount: conf.Config.Strategy.Floating.TotalAmount,
 		Depth:       conf.Config.Strategy.Floating.Depth,
 		FloatRate:   conf.Config.Strategy.Floating.FloatRate,
@@ -218,14 +214,14 @@ func order(price float64, orderType int, ts int64) error {
 	logger.Info("current money: ", money, "amount: ", amount, " fee: ", fee)
 	// 模拟下单即买入
 	o := &models.Order{
-		Strategy: conf.Config.Strategy.Type,
-		Money:    money,
-		Price:    price,
-		Amount:   amount,
-		Fee:      fee,
-		Type:     orderType,
-		Status:   models.OrderStatusSuccess, // 模拟下单即买入
-		Ts:       ts,
+		StrategyID: 1,
+		Money:      money,
+		Price:      price,
+		Amount:     amount,
+		Fee:        fee,
+		Type:       orderType,
+		Status:     models.OrderStatusSuccess, // 模拟下单即买入
+		Ts:         ts,
 	}
 	err := o.Save()
 	orderList = append(orderList, o)

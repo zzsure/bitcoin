@@ -16,7 +16,7 @@ const (
 	// only required when Private Signature is enabled
 	// todo: replace with your own PrivateKey from privatekey.pem
 	PRIVATE_KEY_PRIME_256 string = `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-    ACCOUNT_ID = "8806108"
+	ACCOUNT_ID                   = "8806108"
 )
 
 // API请求地址, 不要带最后的/
@@ -54,6 +54,16 @@ type ConfigTOML struct {
 	Huobi struct {
 		BuyRates  float64 `required:"true" default:0.0003 flagUsage:"买入手续费"`
 		SaleRates float64 `required:"true" default:0.0002 flagUsage:"卖出手续费"`
+	}
+
+	Strategy struct {
+		Type     string `required:"true" default:"floating" flagUsage:"floating浮动买入"`
+		Floating struct {
+			TotalAmount float64 `required:"true" default:0.0 flagUsage:"总金额仓位"`
+			FloatRate   float64 `required:"true" default:0.01 flagUsage:"上下浮动的比例"`
+			Depth       int     `required:"true" default:8 flagUsage:"最多下降和上升多少次"`
+			Interval    int64   `required:"true" default:600 flagUsage:"间隔多少s再次启用策略"`
+		}
 	}
 
 	KLineData struct {

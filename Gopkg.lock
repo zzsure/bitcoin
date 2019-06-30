@@ -146,6 +146,14 @@
   revision = "970db520ece77730c7e4724c61121037378659d9"
 
 [[projects]]
+  digest = "1:ed615c5430ecabbb0fb7629a182da65ecee6523900ac1ac932520860878ffcad"
+  name = "github.com/robfig/cron"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b41be1df696709bb6395fe435af20370037c0b4c"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
@@ -213,6 +221,7 @@
     "github.com/jinzhu/gorm/dialects/mysql",
     "github.com/koding/multiconfig",
     "github.com/op/go-logging",
+    "github.com/robfig/cron",
     "github.com/satori/go.uuid",
     "github.com/urfave/cli",
   ]

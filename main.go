@@ -14,6 +14,7 @@ func main() {
 	app.Commands = []cli.Command{
 		server.Server,
 		tool.InitDB,
+		tool.MigrateDB,
 	}
 	err := app.Run(os.Args)
 	if err != nil {

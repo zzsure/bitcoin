@@ -23,9 +23,17 @@ SaleRates = 0.002
 
 [KLineData]
 Symbol = "market.btcusdt.kline.1min"
-From = 1560614400
-To = 1561384680
+From = 1513512660
+To = 1544889060
 Duration = 5
 
 [Log]
 Type = "raw"
+
+[Strategy]
+Type = "floating"
+[Strategy.Floating]
+    TotalAmount = 100000.0
+    FloatRate = 0.02
+    Depth = 4
+    Interval = 18000

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
+	"strconv"
 	"time"
 
 	"github.com/satori/go.uuid"
@@ -59,4 +61,21 @@ func UnzipData(data []byte) (resData []byte, err error) {
 	resData = resB.Bytes()
 
 	return
+}
+
+func Float64ToString(f float64) string {
+	return strconv.FormatFloat(f, 'f', -1, 64)
+}
+
+func StringToFloat64(s string) float64 {
+	f, _ := strconv.ParseFloat(s, 64)
+	return f
+}
+
+func Float64Precision(f float64, prec int, round bool) float64 {
+	pow10_n := math.Pow10(prec)
+	if round {
+		return math.Trunc(f+0.5/pow10_n) * pow10_n / pow10_n
+	}
+	return math.Trunc((f)*pow10_n) / pow10_n
 }
