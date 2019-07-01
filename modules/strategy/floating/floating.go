@@ -39,15 +39,18 @@ func Init(strategy models.Strategy) {
 	}
 	logger.Info("history order num:", len(ol))
 	ta := huobi.GetCurrencyBalance(strategy, "usdt")
-	ta = 30.0
+	//ta = 30.0
 	logger.Info("account:", strategy.AccountID, ", balance:", ta)
 	d := 0
 	for _, o := range ol {
 		if o.Type == models.OrderTypeBuy && o.Status == models.OrderStatusSuccess {
-			ta -= o.Money
+			ta += o.Money
 		} else if o.Type == models.OrderTypeSale && o.Status == models.OrderStatusSuccess {
 			d++
 		}
+	}
+	if ta > strategy.TotalAmount {
+		ta = strategy.TotalAmount
 	}
 	// TODO:未成单的处理
 	spMap[strategy.ID] = &StrategyProcess{
@@ -76,9 +79,6 @@ func StrategyDeal(kld *models.KLineData) {
 }
 
 func strategyProcessDeal(sp *StrategyProcess, kld *models.KLineData) error {
-	if sp.TotalAmount <= 5.0 {
-		return errors.New("no fund")
-	}
 	if sp.Depth == 0 && len(sp.OrderList) == 0 {
 		if kld.Ts-sp.LastSettle < sp.Strategy.Interval {
 			return errors.New("just wait interval k line buy...")
@@ -160,11 +160,9 @@ func order(sp *StrategyProcess, price float64, orderType int, ts int64) error {
 		money = math.Pow(2, float64(sp.Depth)) * per
 		// 最后一次把余额都拿出来
 		if sp.Depth == sp.Strategy.Depth-1 {
-			money = sp.TotalAmount
-			for _, o := range sp.OrderList {
-				if models.OrderTypeBuy == o.Type {
-					money -= o.Money
-				}
+			money = huobi.GetCurrencyBalance(sp.Strategy, "usdt")
+			if money > sp.Strategy.TotalAmount {
+				money = sp.Strategy.TotalAmount
 			}
 		}
 		amount = money / price
@@ -176,6 +174,7 @@ func order(sp *StrategyProcess, price float64, orderType int, ts int64) error {
 	var err error
 	// 火币下单
 	if models.OrderTypeBuy == orderType {
+		money = util.Float64Precision(money, 8, false)
 		externalID, err = placeOrder(sp, "btcusdt", "buy-market", money)
 	} else if models.OrderTypeSale == orderType {
 		externalID, err = placeOrder(sp, "btcusdt", "sell-market", amount)
@@ -201,12 +200,14 @@ func order(sp *StrategyProcess, price float64, orderType int, ts int64) error {
 		return err
 	}
 	// 查询订单详情，TODO:好的检查策略
+	retryTimes := 0
 	orderDetail := huobi.PlaceDetail(sp.Strategy, externalID)
-	for orderDetail.Data.State != "filled" {
+	for orderDetail.Data.State != "filled" && retryTimes < 11 {
 		logger.Error("wait order not filled:", orderDetail)
 		time.Sleep(time.Duration(5) * time.Second)
 		orderDetail = huobi.PlaceDetail(sp.Strategy, externalID)
 		logger.Info("order detail:", orderDetail)
+		retryTimes++
 	}
 	//o.Price = util.StringToFloat64(orderDetail.Data.Price)
 	fieldAmount := util.StringToFloat64(orderDetail.Data.FieldAmount)
@@ -226,7 +227,9 @@ func order(sp *StrategyProcess, price float64, orderType int, ts int64) error {
 		o.Fee = fieldFees
 	}
 	o.ExternalID = externalID
-	o.Status = models.OrderStatusSuccess
+	if orderDetail.Data.State == "filled" {
+		o.Status = models.OrderStatusSuccess
+	}
 	err = o.Save()
 	if err != nil {
 		return err
