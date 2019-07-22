@@ -56,7 +56,7 @@ func start(klds []*models.KLineData, d int, r float64) {
 		}
 		if depth == 0 && len(orderList) == 0 {
 			if kld.Ts-lastSettle < conf.Config.Strategy.Floating.Interval {
-				logger.Info("just wait interval k line buy...")
+				//logger.Info("just wait interval k line buy...")
 				continue
 			}
 			//orderList := make([]*models.Order, conf.Config.Strategy.Floating.Depth)
@@ -128,7 +128,7 @@ func strategy(kld *models.KLineData) error {
 				return err
 			}
 		} else {
-			logger.Info("just wait strategy k line buy...")
+			//logger.Info("just wait strategy k line buy...")
 		}
 	}
 	return nil

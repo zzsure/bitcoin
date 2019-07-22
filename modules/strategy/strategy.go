@@ -4,9 +4,10 @@ import (
 	"github.com/op/go-logging"
 	"gitlab.azbit.cn/web/bitcoin/models"
 	"gitlab.azbit.cn/web/bitcoin/modules/strategy/floating"
+	//"gitlab.azbit.cn/web/bitcoin/modules/strategy/history"
 )
 
-var logger = logging.MustGetLogger("modules/socket")
+var logger = logging.MustGetLogger("modules/strategy")
 
 func Init() {
 	//history.Init()

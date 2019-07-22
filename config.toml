@@ -11,7 +11,7 @@ Secret = "U4LOTsSWEASOCXNl4lzyg0rOyGztm1so"
 [Database]
 HostPort = "tcp(172.17.0.1:3306)"
 UserPassword = "root:Eu*MZO7iw6^0w7gX"
-DB = "bc"
+DB = "bitcoin"
 [Database.Conn]
     MaxLifeTime = 600
     MaxIdle = 10
@@ -33,7 +33,7 @@ Type = "raw"
 [Strategy]
 Type = "floating"
 [Strategy.Floating]
-    TotalAmount = 100000.0
+    TotalAmount = 1400.0
     FloatRate = 0.02
     Depth = 4
-    Interval = 18000
+    Interval = 86400

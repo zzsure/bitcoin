@@ -11,15 +11,15 @@ Secret = "U4LOTsSWEASOCXNl4lzyg0rOyGztm1so"
 [Database]
 HostPort = "tcp(172.17.0.1:3306)"
 UserPassword = "root:Eu*MZO7iw6^0w7gX"
-DB = "bitcoin"
+DB = "bc"
 [Database.Conn]
     MaxLifeTime = 600
     MaxIdle = 10
     MaxOpen = 80
 
 [KLineData]
-From = 1544889060
-To = 1560614400
+From = 1509465660
+To = 1557458220
 Duration = 5
 
 [Strategy]

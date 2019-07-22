@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"time"
 
 	"github.com/op/go-logging"
 	"gitlab.azbit.cn/web/bitcoin/conf"
@@ -14,7 +13,7 @@ import (
 	"gitlab.azbit.cn/web/bitcoin/modules/huobi"
 )
 
-var logger = logging.MustGetLogger("modules/socket")
+var logger = logging.MustGetLogger("modules/strategy/floating")
 
 type StrategyProcess struct {
 	Strategy    models.Strategy
@@ -43,9 +42,9 @@ func Init(strategy models.Strategy) {
 	logger.Info("account:", strategy.AccountID, ", balance:", ta)
 	d := 0
 	for _, o := range ol {
-		if o.Type == models.OrderTypeBuy && o.Status == models.OrderStatusSuccess {
+		if o.Type == models.OrderTypeBuy {
 			ta += o.Money
-		} else if o.Type == models.OrderTypeSale && o.Status == models.OrderStatusSuccess {
+		} else if o.Type == models.OrderTypeSale {
 			d++
 		}
 	}
@@ -170,92 +169,20 @@ func order(sp *StrategyProcess, price float64, orderType int, ts int64) error {
 		amount -= amount * conf.Config.Huobi.BuyRates
 	}
 	logger.Info("current money: ", money, "amount: ", amount, " fee: ", fee)
-	var externalID string
-	var err error
+
 	// 火币下单
 	if models.OrderTypeBuy == orderType {
-		money = util.Float64Precision(money, 8, false)
-		externalID, err = placeOrder(sp, "btcusdt", "buy-market", money)
-	} else if models.OrderTypeSale == orderType {
-		externalID, err = placeOrder(sp, "btcusdt", "sell-market", amount)
-		//externalID, err = placeOrder(sp, "btcusdt", "sell-market", "0.0008"amount)
+		amount = money
 	}
+	o, err := huobi.HuobiPlaceOrder(sp.Strategy, "btcusdt", orderType, amount)
 	if err != nil {
 		return err
 	}
-	o := &models.Order{
-		StrategyID:    sp.Strategy.ID,
-		Money:         money,
-		Price:         price,
-		Amount:        amount,
-		Fee:           fee,
-		Type:          orderType,
-		Status:        models.OrderStatusBuy, // 模拟下单即买入
-		Ts:            ts,
-		ExternalID:    "",
-		RefrencePrice: price,
-	}
-	err = o.Save()
-	if err != nil {
-		return err
-	}
-	// 查询订单详情，TODO:好的检查策略
-	retryTimes := 0
-	orderDetail := huobi.PlaceDetail(sp.Strategy, externalID)
-	for orderDetail.Data.State != "filled" && retryTimes < 11 {
-		logger.Error("wait order not filled:", orderDetail)
-		time.Sleep(time.Duration(5) * time.Second)
-		orderDetail = huobi.PlaceDetail(sp.Strategy, externalID)
-		logger.Info("order detail:", orderDetail)
-		retryTimes++
-	}
-	//o.Price = util.StringToFloat64(orderDetail.Data.Price)
-	fieldAmount := util.StringToFloat64(orderDetail.Data.FieldAmount)
-	fieldFees := util.StringToFloat64(orderDetail.Data.FieldFees)
-	fieldCashAmount := util.StringToFloat64(orderDetail.Data.FieldCashAmount)
-	if models.OrderTypeBuy == orderType {
-		o.Money = fieldCashAmount
-		// 已成交数量-已成交手续费
-		o.Amount = fieldAmount - fieldFees
-		// 已成交总金额/已成交数量
-		o.Price = fieldCashAmount / fieldAmount
-		o.Fee = fieldCashAmount * fieldFees / fieldAmount
-	} else if models.OrderTypeSale == orderType {
-		o.Money = fieldCashAmount - fieldFees
-		o.Amount = fieldAmount
-		o.Price = fieldCashAmount / fieldAmount
-		o.Fee = fieldFees
-	}
-	o.ExternalID = externalID
-	if orderDetail.Data.State == "filled" {
-		o.Status = models.OrderStatusSuccess
-	}
-	err = o.Save()
-	if err != nil {
-		return err
-	}
+	o.RefrencePrice = price
+	o.Save()
 
 	sp.OrderList = append(sp.OrderList, o)
 	return err
-}
-
-func placeOrder(sp *StrategyProcess, symobol, orderType string, amount float64) (string, error) {
-	var placeParams models.PlaceRequestParams
-	placeParams.AccountID = sp.Strategy.AccountID
-	placeParams.Amount = util.Float64ToString(amount)
-	//placeParams.Price = util.Float64ToString(price)
-	placeParams.Source = "api"
-	placeParams.Symbol = symobol
-	placeParams.Type = orderType
-	logger.Info("Place order with: ", placeParams)
-	placeReturn := huobi.Place(sp.Strategy, placeParams)
-	if placeReturn.Status == "ok" {
-		logger.Info("Place return: ", placeReturn.Data)
-		return placeReturn.Data, nil
-	} else {
-		logger.Error("Place error: ", placeReturn.ErrMsg)
-		return "", errors.New("place failed")
-	}
 }
 
 func settle(sp *StrategyProcess) error {

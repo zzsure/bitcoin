@@ -194,14 +194,14 @@ func Init() {
 	}
 	logger.Info("connect huobi success")
 
-	err = sendSubMsg(c)
+	/*err = sendSubMsg(c)
 	if err != nil {
 		logger.Error("write sub:", err)
-	}
-	/*err = sendReqMsg(c, conf.Config.KLineData.From)
+	}*/
+	err = sendReqMsg(c, conf.Config.KLineData.From)
 	if err != nil {
 		logger.Error("write req:", err)
-	}*/
+	}
 
 	defer c.Close()
 

@@ -2,8 +2,10 @@ package huobi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/op/go-logging"
 	"gitlab.azbit.cn/web/bitcoin/conf"
@@ -245,6 +247,87 @@ func Place(strategy models.Strategy, placeRequestParams models.PlaceRequestParam
 	json.Unmarshal([]byte(jsonPlaceReturn), &placeReturn)
 
 	return placeReturn
+}
+
+// 火币下单，写入订单表
+func HuobiPlaceOrder(strategy models.Strategy, symbol string, orderType int, amount float64) (*models.Order, error) {
+	huobiOrderType := ""
+	// 更正浮点精度
+	if models.OrderTypeBuy == orderType {
+		huobiOrderType = "buy-market"
+		amount = util.Float64Precision(amount, 8, false)
+	} else if models.OrderTypeSale == orderType {
+		huobiOrderType = "sell-market"
+		amount = util.Float64Precision(amount, 4, false)
+	}
+
+	// 火币下单
+	var placeParams models.PlaceRequestParams
+	placeParams.AccountID = strategy.AccountID
+	placeParams.Amount = util.Float64ToString(amount)
+	//placeParams.Price = util.Float64ToString(price)
+	placeParams.Source = "api"
+	placeParams.Symbol = symbol
+	placeParams.Type = huobiOrderType
+	logger.Info("Place order with: ", placeParams)
+	placeReturn := Place(strategy, placeParams)
+	externalID := ""
+	if placeReturn.Status == "ok" {
+		logger.Info("Place return: ", placeReturn.Data)
+		externalID = placeReturn.Data
+	} else {
+		return nil, errors.New(placeReturn.ErrMsg)
+	}
+	// 构造订单结构
+	o := &models.Order{
+		StrategyID: strategy.ID,
+		Amount:     amount,
+		Type:       orderType,
+		Status:     models.OrderStatusBuy, // 模拟下单即买入
+		ExternalID: "",
+	}
+	err := o.Save()
+	if err != nil {
+		return nil, err
+	}
+
+	// 查询订单详情，TODO:好的检查策略
+	retryTimes := 0
+	orderDetail := PlaceDetail(strategy, externalID)
+	for orderDetail.Data.State != "filled" && retryTimes < 11 {
+		logger.Info("wait order not filled:", orderDetail)
+		time.Sleep(time.Duration(5) * time.Second)
+		orderDetail = PlaceDetail(strategy, externalID)
+		logger.Info("get order detail success:", orderDetail)
+		retryTimes++
+	}
+	//o.Price = util.StringToFloat64(orderDetail.Data.Price)
+	fieldAmount := util.StringToFloat64(orderDetail.Data.FieldAmount)
+	fieldFees := util.StringToFloat64(orderDetail.Data.FieldFees)
+	fieldCashAmount := util.StringToFloat64(orderDetail.Data.FieldCashAmount)
+	if models.OrderTypeBuy == orderType {
+		o.Money = fieldCashAmount
+		// 已成交数量-已成交手续费
+		o.Amount = fieldAmount - fieldFees
+		// 已成交总金额/已成交数量
+		o.Price = fieldCashAmount / fieldAmount
+		o.Fee = fieldCashAmount * fieldFees / fieldAmount
+	} else if models.OrderTypeSale == orderType {
+		o.Money = fieldCashAmount - fieldFees
+		o.Amount = fieldAmount
+		o.Price = fieldCashAmount / fieldAmount
+		o.Fee = fieldFees
+	}
+	o.Ts = orderDetail.Data.CreatedAt
+	o.ExternalID = externalID
+	if orderDetail.Data.State == "filled" {
+		o.Status = models.OrderStatusSuccess
+	}
+	err = o.Save()
+	if err != nil {
+		return nil, err
+	}
+	return o, nil
 }
 
 // 申请撤销一个订单请求

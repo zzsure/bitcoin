@@ -15,6 +15,8 @@ func main() {
 		server.Server,
 		tool.InitDB,
 		tool.MigrateDB,
+		tool.Sale,
+		tool.Huobi,
 	}
 	err := app.Run(os.Args)
 	if err != nil {

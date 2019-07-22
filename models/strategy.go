@@ -20,3 +20,9 @@ func GetAllStrategys() ([]Strategy, error) {
 	err := db.DB.Where("status = 1").Find(&s).Error
 	return s, err
 }
+
+func GetStrategyByID(id int) (Strategy, error) {
+	var s Strategy
+	err := db.DB.Where("id = ? and status = 1", id).Find(&s).Error
+	return s, err
+}
