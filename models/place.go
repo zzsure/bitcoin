@@ -37,3 +37,10 @@ type PlaceDetailReturn struct {
 	Status string      `json:"status"`
 	Data   PlaceDetail `json:"data"`
 }
+
+type PlaceOrdersReturn struct {
+	Status  string        `json:"status"`
+	Data    []PlaceDetail `json:"data"`
+	ErrCode string        `json:"err-code"`
+	ErrMsg  string        `json:"err-msg"`
+}

@@ -79,3 +79,19 @@ func Float64Precision(f float64, prec int, round bool) float64 {
 	}
 	return math.Trunc((f)*pow10_n) / pow10_n
 }
+
+func IntToString(i int) string {
+	return fmt.Sprintf("%v", i)
+}
+
+func GetBackNum(num, divisor int) (int, int) {
+	if divisor <= 0 {
+		return 0, 0
+	}
+	if num < divisor {
+		return 0, 0
+	}
+	d := num / divisor
+	r := d % 10
+	return d, r
+}

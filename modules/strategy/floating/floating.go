@@ -179,7 +179,8 @@ func order(sp *StrategyProcess, price float64, orderType int, ts int64) error {
 		return err
 	}
 	o.RefrencePrice = price
-	o.Save()
+	o.Ts = ts
+	err = o.Save()
 
 	sp.OrderList = append(sp.OrderList, o)
 	return err

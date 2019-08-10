@@ -251,6 +251,7 @@ func Place(strategy models.Strategy, placeRequestParams models.PlaceRequestParam
 
 // 火币下单，写入订单表
 func HuobiPlaceOrder(strategy models.Strategy, symbol string, orderType int, amount float64) (*models.Order, error) {
+	return nil, errors.New("for test")
 	huobiOrderType := ""
 	// 更正浮点精度
 	if models.OrderTypeBuy == orderType {
@@ -352,4 +353,20 @@ func PlaceDetail(strategy models.Strategy, strOrderID string) models.PlaceDetail
 	json.Unmarshal([]byte(jsonPlaceReturn), &placeDetailReturn)
 
 	return placeDetailReturn
+}
+
+// 搜索历史订单
+func GetOrders(strategy models.Strategy, strSymbol string, nSize int) models.PlaceOrdersReturn {
+	placeOrdersReturn := models.PlaceOrdersReturn{}
+
+	strRequest := fmt.Sprintf("/v1/order/orders")
+	mapParams := make(map[string]string)
+	mapParams["symbol"] = strSymbol
+	mapParams["types"] = "buy-limit,sell-limit"
+	mapParams["states"] = "submitted,filled"
+	mapParams["size"] = util.IntToString(nSize)
+	jsonOrdersReturn := huobi_util.ApiKeyGet(strategy, mapParams, strRequest)
+	json.Unmarshal([]byte(jsonOrdersReturn), &placeOrdersReturn)
+
+	return placeOrdersReturn
 }
