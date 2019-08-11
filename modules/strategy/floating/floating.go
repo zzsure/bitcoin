@@ -26,7 +26,6 @@ type StrategyProcess struct {
 var spMap map[uint]*StrategyProcess
 
 // TODO: 下单没成单的处理
-
 func Init(strategy models.Strategy) {
 	if nil == spMap {
 		spMap = make(map[uint]*StrategyProcess)

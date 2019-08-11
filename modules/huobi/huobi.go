@@ -319,7 +319,7 @@ func HuobiPlaceOrder(strategy models.Strategy, symbol string, orderType int, amo
 		o.Price = fieldCashAmount / fieldAmount
 		o.Fee = fieldFees
 	}
-	o.Ts = orderDetail.Data.CreatedAt
+	o.Ts = orderDetail.Data.CreatedAt / 1000
 	o.ExternalID = externalID
 	if orderDetail.Data.State == "filled" {
 		o.Status = models.OrderStatusSuccess
