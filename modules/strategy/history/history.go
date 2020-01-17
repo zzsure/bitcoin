@@ -7,9 +7,9 @@ import (
 	"math"
 
 	"github.com/op/go-logging"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/library/util"
-	"gitlab.azbit.cn/web/bitcoin/models"
+	"bitcoin/conf"
+	"bitcoin/library/util"
+	"bitcoin/models"
 )
 
 var logger = logging.MustGetLogger("modules/socket")

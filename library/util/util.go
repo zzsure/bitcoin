@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/satori/go.uuid"
-	"gitlab.azbit.cn/web/bitcoin/library/util/net"
+	"bitcoin/library/util/net"
 )
 
 func GetTodayDay() string {

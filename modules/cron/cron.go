@@ -5,9 +5,9 @@ import (
 
 	"github.com/op/go-logging"
 	"github.com/robfig/cron"
-	"gitlab.azbit.cn/web/bitcoin/models"
-	"gitlab.azbit.cn/web/bitcoin/modules/huobi"
-	"gitlab.azbit.cn/web/bitcoin/modules/strategy"
+	"bitcoin/models"
+	"bitcoin/modules/huobi"
+	"bitcoin/modules/strategy"
 )
 
 var c *cron.Cron

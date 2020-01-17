@@ -2,10 +2,10 @@ package strategy
 
 import (
 	"github.com/op/go-logging"
-	"gitlab.azbit.cn/web/bitcoin/models"
-	"gitlab.azbit.cn/web/bitcoin/modules/strategy/five_up_down"
-	"gitlab.azbit.cn/web/bitcoin/modules/strategy/floating"
-	//"gitlab.azbit.cn/web/bitcoin/modules/strategy/history"
+	"bitcoin/models"
+	"bitcoin/modules/strategy/five_up_down"
+	"bitcoin/modules/strategy/floating"
+	//"bitcoin/modules/strategy/history"
 )
 
 var logger = logging.MustGetLogger("modules/strategy")

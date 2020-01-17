@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/op/go-logging"
-	"gitlab.azbit.cn/web/bitcoin/library/util"
-	"gitlab.azbit.cn/web/bitcoin/models"
-	"gitlab.azbit.cn/web/bitcoin/modules/huobi"
+	"bitcoin/library/util"
+	"bitcoin/models"
+	"bitcoin/modules/huobi"
 )
 
 var logger = logging.MustGetLogger("modules/strategy/five_up_down")

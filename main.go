@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/urfave/cli"
-	"gitlab.azbit.cn/web/bitcoin/cmd/server"
-	"gitlab.azbit.cn/web/bitcoin/cmd/tool"
+	"bitcoin/cmd/server"
+	"bitcoin/cmd/tool"
 )
 
 func main() {

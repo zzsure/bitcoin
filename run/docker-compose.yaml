@@ -6,8 +6,8 @@ services:
     container_name: bitcoin-devel-${USER}
     network_mode: "host"
     volumes:
-      - "../:/root/go/src/gitlab.azbit.cn/web/bitcoin"
-    working_dir: /root/go/src/gitlab.azbit.cn/web/bitcoin
+      - "../:/root/go/src/bitcoin"
+    working_dir: /root/go/src/bitcoin
     environment:
       - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/go/bin
     entrypoint:

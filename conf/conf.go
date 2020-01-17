@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/koding/multiconfig"
-	"gitlab.azbit.cn/web/bitcoin/library/util"
+	"bitcoin/library/util"
 )
 
 const (

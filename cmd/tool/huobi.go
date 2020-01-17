@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 
 	"github.com/urfave/cli"
-	"gitlab.azbit.cn/web/bitcoin/cmd"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/library/db"
-	"gitlab.azbit.cn/web/bitcoin/models"
-	"gitlab.azbit.cn/web/bitcoin/modules/huobi"
+	"bitcoin/cmd"
+	"bitcoin/conf"
+	"bitcoin/library/db"
+	"bitcoin/models"
+	"bitcoin/modules/huobi"
 )
 
 const (

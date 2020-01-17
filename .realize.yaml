@@ -1,0 +1,38 @@
+settings:
+  legacy:
+    force: false
+    interval: 0s
+schema:
+- name: bitcoin
+  path: .
+  env:
+    ARG: server
+  commands:
+    install:
+      status: true
+      method: go build -o ./bitcoin -mod=vendor
+    run:
+      status: true
+      method: ./bitcoin
+      args:
+        - server
+  args:
+    - server
+    - --conf=./run/config.toml
+  watcher:
+    extensions:
+    - go
+    - toml
+    paths:
+    - /
+    ignore:
+      paths:
+        - .git
+        - .realize
+        - vendor
+        - static
+        - test
+        - log
+        - asset
+        - redis
+        - doc

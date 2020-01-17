@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/op/go-logging"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/library/util"
-	"gitlab.azbit.cn/web/bitcoin/library/util/huobi"
-	"gitlab.azbit.cn/web/bitcoin/models"
+	"bitcoin/conf"
+	"bitcoin/library/util"
+	"bitcoin/library/util/huobi"
+	"bitcoin/models"
 )
 
 var logger = logging.MustGetLogger("modules/huobi")

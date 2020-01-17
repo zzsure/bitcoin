@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/op/go-logging"
 	"github.com/satori/go.uuid"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/library/log"
+	"bitcoin/conf"
+	"bitcoin/library/log"
 )
 
 var logger = logging.MustGetLogger("middleware")

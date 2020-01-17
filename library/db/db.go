@@ -6,7 +6,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"gitlab.azbit.cn/web/bitcoin/conf"
+	"bitcoin/conf"
 )
 
 var DB *gorm.DB

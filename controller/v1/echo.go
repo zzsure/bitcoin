@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/op/go-logging"
-	"gitlab.azbit.cn/web/bitcoin/controller/request"
-	"gitlab.azbit.cn/web/bitcoin/controller/response"
+	"bitcoin/controller/request"
+	"bitcoin/controller/response"
 )
 
 var logger = logging.MustGetLogger("controller/v1")

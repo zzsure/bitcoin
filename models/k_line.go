@@ -1,6 +1,6 @@
 package models
 
-import "gitlab.azbit.cn/web/bitcoin/library/db"
+import "bitcoin/library/db"
 
 type KLineData struct {
 	Model

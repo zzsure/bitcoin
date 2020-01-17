@@ -3,14 +3,14 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/controller/v1"
-	"gitlab.azbit.cn/web/bitcoin/library/db"
-	"gitlab.azbit.cn/web/bitcoin/library/log"
-	"gitlab.azbit.cn/web/bitcoin/middleware"
-	//"gitlab.azbit.cn/web/bitcoin/modules/socket"
-	"gitlab.azbit.cn/web/bitcoin/modules/cron"
-	"gitlab.azbit.cn/web/bitcoin/modules/strategy"
+	"bitcoin/conf"
+	"bitcoin/controller/v1"
+	"bitcoin/library/db"
+	"bitcoin/library/log"
+	"bitcoin/middleware"
+	//"bitcoin/modules/socket"
+	"bitcoin/modules/cron"
+	"bitcoin/modules/strategy"
 )
 
 var Server = cli.Command{

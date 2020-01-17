@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/controller/response"
+	"bitcoin/conf"
+	"bitcoin/controller/response"
 )
 
 var whitePaths = map[string]struct{}{

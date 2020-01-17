@@ -9,7 +9,7 @@ import (
 	"runtime"
 
 	"github.com/op/go-logging"
-	"gitlab.azbit.cn/web/bitcoin/conf"
+	"bitcoin/conf"
 )
 
 type RequestID string

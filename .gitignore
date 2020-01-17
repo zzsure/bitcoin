@@ -1,0 +1,10 @@
+.idea
+.vscode/
+.DS_Store
+bitcoin
+log/
+bin/
+data/
+run/log/
+run/bitcoin
+build/bitcoin

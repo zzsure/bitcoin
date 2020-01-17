@@ -6,12 +6,12 @@ import (
 
 	"github.com/op/go-logging"
 	"github.com/urfave/cli"
-	"gitlab.azbit.cn/web/bitcoin/cmd"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/library/db"
-	"gitlab.azbit.cn/web/bitcoin/library/util"
-	"gitlab.azbit.cn/web/bitcoin/models"
-	"gitlab.azbit.cn/web/bitcoin/modules/huobi"
+	"bitcoin/cmd"
+	"bitcoin/conf"
+	"bitcoin/library/db"
+	"bitcoin/library/util"
+	"bitcoin/models"
+	"bitcoin/modules/huobi"
 )
 
 var logger = logging.MustGetLogger("cmd/tool")

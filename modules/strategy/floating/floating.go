@@ -7,10 +7,10 @@ import (
 	"math"
 
 	"github.com/op/go-logging"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/library/util"
-	"gitlab.azbit.cn/web/bitcoin/models"
-	"gitlab.azbit.cn/web/bitcoin/modules/huobi"
+	"bitcoin/conf"
+	"bitcoin/library/util"
+	"bitcoin/models"
+	"bitcoin/modules/huobi"
 )
 
 var logger = logging.MustGetLogger("modules/strategy/floating")

@@ -4,7 +4,7 @@ import (
 	//"github.com/op/go-logging"
 	"time"
 
-	"gitlab.azbit.cn/web/bitcoin/library/db"
+	"bitcoin/library/db"
 )
 
 type Model struct {

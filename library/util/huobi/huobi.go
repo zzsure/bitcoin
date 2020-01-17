@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/models"
+	"bitcoin/conf"
+	"bitcoin/models"
 )
 
 // Http Get请求基础函数, 通过封装Go语言Http请求, 支持火币网REST API的HTTP Get请求

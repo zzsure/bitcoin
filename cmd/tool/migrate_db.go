@@ -2,9 +2,9 @@ package tool
 
 import (
 	"github.com/urfave/cli"
-	"gitlab.azbit.cn/web/bitcoin/conf"
-	"gitlab.azbit.cn/web/bitcoin/library/db"
-	"gitlab.azbit.cn/web/bitcoin/models"
+	"bitcoin/conf"
+	"bitcoin/library/db"
+	"bitcoin/models"
 )
 
 var MigrateDB = cli.Command{
