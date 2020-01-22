@@ -9,13 +9,24 @@ Secret = "U4LOTsSWEASOCXNl4lzyg0rOyGztm1so"
     "gZmZHTdPhnnYX9PPJ0BXTl5BcxIj5hBv" = "830NOp3sbxGJQBzS9onXr0ud01mmm1Vr"
 
 [Database]
-HostPort = "tcp(172.17.0.1:3306)"
-UserPassword = "root:Eu*MZO7iw6^0w7gX"
-DB = "bc"
+HostPort = "tcp(127.0.0.1:6136)"
+UserPassword = "root:X5Mo%eUT"
+DB = "bitcoin"
 [Database.Conn]
     MaxLifeTime = 600
     MaxIdle = 10
     MaxOpen = 80
+
+[Redis]
+IsUse = true
+Addr = "127.0.0.1:6138"
+Password = "X2o^tv1^"
+DB = 1
+PoolSize = 5
+
+[Huobi]
+BuyRates = 0.002
+SaleRates = 0.002
 
 [KLineData]
 From = 1509465660
@@ -25,8 +36,10 @@ Duration = 5
 [Strategy]
 Type = "floating"
 [Strategy.Floating]
-    StockPos = 10000.0
-    Depth = 8
+    TotalAmount = 1400.0
+    FloatRate = 0.02
+    Depth = 4
+    Interval = 86400
 
 [Log]
 Type = "raw"

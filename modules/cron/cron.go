@@ -1,7 +1,11 @@
 package cron
 
 import (
+	"bitcoin/conf"
+	"bitcoin/consts"
+	"bitcoin/library/redis"
 	"encoding/json"
+	"time"
 
 	"github.com/op/go-logging"
 	"github.com/robfig/cron"
@@ -17,13 +21,43 @@ var logger = logging.MustGetLogger("modules/cron")
 func Init() {
 	c = cron.New()
 	getHuobiKLineCron()
+	getBalanceCron()
 	c.Start()
 }
 
 func getHuobiKLineCron() {
-	c.AddFunc("*/10 * * * * *", func() {
+	c.AddFunc("@every 10s", func() {
 		getHuobiKLine()
 	})
+}
+
+func getBalanceCron() {
+	c.AddFunc("@every 1m", func() {
+		getHuobiBalance()
+	})
+}
+
+func getHuobiBalance() {
+	strategys, err := models.GetAllStrategys()
+	if err != nil {
+		logger.Error("get strategys err:", err)
+		return
+	}
+	usdt := 0.0
+	btc := 0.0
+	for _, s := range strategys {
+		usdt += huobi.GetCurrencyBalance(s, "usdt")
+		btc += huobi.GetCurrencyBalance(s, "btc")
+	}
+	balanceMap := make(map[string]float64)
+	balanceMap["usdt"] = usdt
+	balanceMap["btc"] = btc
+	b, _ := json.Marshal(balanceMap)
+	if conf.Config.Redis.IsUse {
+		redis.GoRedisClient.Set(consts.HUOBI_BALANCE_KEY, string(b), time.Second*consts.REDIS_KEY_EXPIRED_SECONDS)
+	} else {
+		logger.Error("redis client error...")
+	}
 }
 
 func getHuobiKLine() {

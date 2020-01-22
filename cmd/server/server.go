@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bitcoin/library/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
 	"bitcoin/conf"
@@ -35,6 +36,7 @@ func run(c *cli.Context) {
 	conf.Init(c.String("conf"), c.String("args"))
 	log.Init()
 	db.Init()
+	redis.Init()
 	strategy.Init()
 	//socket.Init()
 	cron.Init()

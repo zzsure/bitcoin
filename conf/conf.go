@@ -20,6 +20,7 @@ const (
 )
 
 // API请求地址, 不要带最后的/
+// https://huobiapi.github.io/docs/spot/v1/cn/#api
 const (
 	//todo: replace with real URLs and HostName
 	MARKET_URL string = "https://api.huobi.pro"
@@ -49,6 +50,14 @@ type ConfigTOML struct {
 			MaxIdle     int `default:"10" flagUsage:"最多空闲连接数"`
 			MaxOpen     int `default:"80" flagUsage:"最多打开连接数"`
 		}
+	}
+
+	Redis struct {
+		IsUse    bool   `default:"true" flagUsage:"是否开启缓存"`
+		Addr     string `flagUsage:"Redis地址"`
+		Password string `default:"" flagUsage:"Redis密码"`
+		DB       int    `default:"0" flagUsage:"Redis数据库"`
+		PoolSize int    `default:"100"  flagUsage:"Redis连接池大小"`
 	}
 
 	Huobi struct {
