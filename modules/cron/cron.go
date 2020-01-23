@@ -27,13 +27,17 @@ func Init() {
 
 func getHuobiKLineCron() {
 	c.AddFunc("@every 10s", func() {
+		logger.Info("get huobi kline cron begin")
 		getHuobiKLine()
+		logger.Info("get huobi kline cron end")
 	})
 }
 
 func getBalanceCron() {
 	c.AddFunc("@every 1m", func() {
+		logger.Info("get balance cron begin")
 		getHuobiBalance()
+		logger.Info("get balance cron end")
 	})
 }
 
@@ -53,6 +57,7 @@ func getHuobiBalance() {
 	balanceMap["usdt"] = usdt
 	balanceMap["btc"] = btc
 	b, _ := json.Marshal(balanceMap)
+	logger.Info("balace map", string(b))
 	if conf.Config.Redis.IsUse {
 		redis.GoRedisClient.Set(consts.HUOBI_BALANCE_KEY, string(b), time.Second*consts.REDIS_KEY_EXPIRED_SECONDS)
 	} else {
