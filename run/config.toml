@@ -1,5 +1,5 @@
 [Server]
-Listen = ":80"
+Listen = ":6130"
 Env = "Dev"
 MaxHttpRequestBody = 4
 
@@ -29,7 +29,8 @@ BuyRates = 0.002
 SaleRates = 0.002
 
 [KLineData]
-From = 1509465660
+Symbol = "market.btcusdt.kline.1min"
+From = 1513512660
 To = 1557458220
 Duration = 5
 
