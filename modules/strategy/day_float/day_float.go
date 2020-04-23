@@ -36,11 +36,11 @@ func Init(strategy models.Strategy) {
 
 func StrategyDeal(kld *models.KLineData) {
 	// kld.Open = 11811.10
-	logger.Info("strategy:", sp.Strategy.Name, "price:", kld.Open, " timestamp:", kld.Ts, " come in deal kline")
 	if nil == sp {
 		logger.Error("sp is nil...")
 		return
 	}
+	logger.Info("strategy:", sp.Strategy.Name, "price:", kld.Open, " timestamp:", kld.Ts, " come in deal kline")
 	err := strategyProcessDeal(kld)
 	if err != nil {
 		logger.Error("strategy process deal err:", err)
@@ -49,6 +49,7 @@ func StrategyDeal(kld *models.KLineData) {
 
 func strategyProcessDeal(kld *models.KLineData) error {
 	date := util.GetDateByTime(time.Now())
+	// TODO：加锁，上一个不完成，不能下第二单
 	if _, ok := sp.DateMap[date]; !ok {
 		amount := sp.Strategy.PerMoney / kld.Open
 		o, err := order.Order(sp.Strategy, amount, kld.Open, models.OrderTypeBuy, kld.Ts)

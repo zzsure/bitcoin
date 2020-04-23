@@ -40,11 +40,11 @@ func Init(strategy models.Strategy) {
 
 func StrategyDeal(kld *models.KLineData) {
 	//kld.Open = 11811.10
-	logger.Info("strategy:", sp.Strategy.Name, "price:", kld.Open, " timestamp:", kld.Ts, " come in deal kline")
 	if nil == sp {
 		logger.Error("sp is nil...")
 		return
 	}
+	logger.Info("strategy:", sp.Strategy.Name, "price:", kld.Open, " timestamp:", kld.Ts, " come in deal kline")
 	err := strategyProcessDeal(sp, kld)
 	if err != nil {
 		logger.Error("strategy process deal err:", err)
