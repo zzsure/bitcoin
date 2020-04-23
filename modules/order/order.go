@@ -13,6 +13,7 @@ var logger = logging.MustGetLogger("modules/order")
 func Order(s models.Strategy, amount, price float64, orderType int, ts int64) (*models.Order, error) {
 	logger.Info("order amount:", amount, "order type:", orderType, "order ts:", ts)
 	o, err := huobi.HuobiPlaceOrder(s, "btcusdt", orderType, amount)
+	logger.Info("order huobi finish, err: ", err)
 	if err != nil {
 		return o, err
 	}
