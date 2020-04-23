@@ -55,19 +55,22 @@ func strategyProcessDeal(kld *models.KLineData) error {
 		sp.DateMap[date] = new(models.Order)
 		amount := sp.Strategy.PerMoney / kld.Open
 		o, err := order.Order(sp.Strategy, amount, kld.Open, models.OrderTypeBuy, kld.Ts)
-		if err == nil {
-			addOrderToProcess(sp.Strategy, o)
+		if err != nil {
+			return err
 		}
+		addOrderToProcess(sp.Strategy, o)
 	}
 	for _, bo := range sp.OrderMap {
 		if (kld.Open-bo.Price)/bo.Price > sp.Strategy.FloatRate {
 			so, err := order.Order(sp.Strategy, bo.Amount, kld.Open, models.OrderTypeSale, kld.Ts)
-			if err == nil {
-				err = order.Settle(sp.Strategy, bo, so, "day_float")
-				if err == nil {
-					removeOrderFromProcess(sp.Strategy, bo)
-				}
+			if err != nil {
+				return err
 			}
+			err = order.Settle(sp.Strategy, bo, so, "day_float")
+			if err != nil {
+				return err
+			}
+			removeOrderFromProcess(sp.Strategy, bo)
 		}
 	}
 	return nil
