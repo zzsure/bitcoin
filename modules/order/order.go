@@ -10,6 +10,7 @@ import (
 
 var logger = logging.MustGetLogger("modules/order")
 
+// 买入的时候amount是金额，卖出的时候是量
 func Order(s models.Strategy, amount, price float64, orderType int, ts int64) (*models.Order, error) {
 	logger.Info("order amount:", amount, "order type:", orderType, "order ts:", ts)
 	o, err := huobi.HuobiPlaceOrder(s, "btcusdt", orderType, amount)

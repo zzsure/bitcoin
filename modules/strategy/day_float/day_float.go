@@ -53,8 +53,7 @@ func strategyProcessDeal(kld *models.KLineData) error {
 	if _, ok := sp.DateMap[date]; !ok {
 		logger.Info("order date: ", date)
 		sp.DateMap[date] = new(models.Order)
-		amount := sp.Strategy.PerMoney / kld.Open
-		o, err := order.Order(sp.Strategy, amount, kld.Open, models.OrderTypeBuy, kld.Ts)
+		o, err := order.Order(sp.Strategy, sp.Strategy.PerMoney, kld.Open, models.OrderTypeBuy, kld.Ts)
 		if err != nil {
 			return err
 		}
