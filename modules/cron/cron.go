@@ -7,11 +7,11 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/op/go-logging"
-	"github.com/robfig/cron"
 	"bitcoin/models"
 	"bitcoin/modules/huobi"
 	"bitcoin/modules/strategy"
+	"github.com/op/go-logging"
+	"github.com/robfig/cron"
 )
 
 var c *cron.Cron
@@ -47,15 +47,31 @@ func getHuobiBalance() {
 		logger.Error("get strategys err:", err)
 		return
 	}
-	usdt := 0.0
-	btc := 0.0
+
+	price := 0.0
+	r := huobi.GetKLine("btcusdt", "1min", 1)
+	if len(r.Data) > 0 {
+		data := r.Data[0]
+		price = data.Open
+	}
+
+	allUsdt := 0.0
+	allBtc := 0.0
+
 	for _, s := range strategys {
-		usdt += huobi.GetCurrencyBalance(s, "usdt")
-		btc += huobi.GetCurrencyBalance(s, "btc")
+		s.UsdtBalance = huobi.GetCurrencyBalance(s, "usdt")
+		allUsdt += s.UsdtBalance
+		s.BtcBalance = huobi.GetCurrencyBalance(s, "btc")
+		allBtc += s.BtcBalance
+		s.RmbValue = (s.UsdtBalance + s.BtcBalance*price) * 7
+		err := s.Save()
+		if err != nil {
+			logger.Error("save strategy id: ", s.ID, ", err: ", err)
+		}
 	}
 	balanceMap := make(map[string]float64)
-	balanceMap["usdt"] = usdt
-	balanceMap["btc"] = btc
+	balanceMap["usdt"] = allUsdt
+	balanceMap["btc"] = allBtc
 	b, _ := json.Marshal(balanceMap)
 	logger.Info("balace map", string(b))
 	if conf.Config.Redis.IsUse {

@@ -1,10 +1,11 @@
 package strategy
 
 import (
-	"github.com/op/go-logging"
 	"bitcoin/models"
+	"bitcoin/modules/strategy/day_float"
 	"bitcoin/modules/strategy/five_up_down"
 	"bitcoin/modules/strategy/floating"
+	"github.com/op/go-logging"
 	//"bitcoin/modules/strategy/history"
 )
 
@@ -21,6 +22,8 @@ func Init() {
 			floating.Init(s)
 		} else if s.Name == "five_up_down" {
 			five_up_down.Init(s)
+		} else if s.Name == "day_float" {
+			day_float.Init(s)
 		}
 	}
 }
@@ -28,4 +31,5 @@ func Init() {
 func StrategyDeal(kld *models.KLineData) {
 	floating.StrategyDeal(kld)
 	five_up_down.StrategyDeal(kld)
+	day_float.StrategyDeal(kld)
 }

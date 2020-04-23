@@ -1,13 +1,10 @@
 package five_up_down
 
 import (
-	"encoding/json"
-	"fmt"
-
-	"github.com/op/go-logging"
 	"bitcoin/library/util"
 	"bitcoin/models"
-	"bitcoin/modules/huobi"
+	"bitcoin/modules/order"
+	"github.com/op/go-logging"
 )
 
 var logger = logging.MustGetLogger("modules/strategy/five_up_down")
@@ -32,7 +29,7 @@ func Init(strategy models.Strategy) {
 	logger.Info("five_up_down history order num:", len(ol))
 	om := make(map[string]*models.Order)
 	for _, o := range ol {
-		key := genOrderKey(strategy.ID, o.ExternalID)
+		key := util.GetOrderKey(strategy.ID, o.ExternalID)
 		om[key] = o
 	}
 	sp = &StrategyProcess{
@@ -46,6 +43,7 @@ func StrategyDeal(kld *models.KLineData) {
 	logger.Info("strategy:", sp.Strategy.Name, "price:", kld.Open, " timestamp:", kld.Ts, " come in deal kline")
 	if nil == sp {
 		logger.Error("sp is nil...")
+		return
 	}
 	err := strategyProcessDeal(sp, kld)
 	if err != nil {
@@ -63,20 +61,20 @@ func strategyProcessDeal(sp *StrategyProcess, kld *models.KLineData) error {
 		// 如果没有买入则买入
 		o := findBuyOrderByPrice(rp)
 		if nil == o {
-			o, err = order(sp.Strategy.FloatRate*rp, rp, models.OrderTypeBuy, kld.Ts)
+			o, err = order.Order(sp.Strategy, sp.Strategy.FloatRate*rp, rp, models.OrderTypeBuy, kld.Ts)
 			if err == nil {
-				key := genOrderKey(sp.Strategy.ID, o.ExternalID)
+				key := util.GetOrderKey(sp.Strategy.ID, o.ExternalID)
 				sp.OrderMap[key] = o
 			}
 		}
 	} else {
 		ol := findCanSaleOrders(rp)
 		for _, bo := range ol {
-			so, err := order(bo.Amount, bo.RefrencePrice+float64(STRATEGY_FIVE*sp.Strategy.Depth), models.OrderTypeSale, kld.Ts)
+			so, err := order.Order(sp.Strategy, bo.Amount, bo.RefrencePrice+float64(STRATEGY_FIVE*sp.Strategy.Depth), models.OrderTypeSale, kld.Ts)
 			if err == nil {
-				err = settle(bo, so)
+				err = order.Settle(sp.Strategy, bo, so, "five_up_down")
 				if err == nil {
-					key := genOrderKey(sp.Strategy.ID, bo.ExternalID)
+					key := util.GetOrderKey(sp.Strategy.ID, bo.ExternalID)
 					delete(sp.OrderMap, key)
 				}
 			}
@@ -106,53 +104,4 @@ func findCanSaleOrders(price float64) []*models.Order {
 		}
 	}
 	return ol
-}
-
-func genOrderKey(sid uint, externalID string) string {
-	return fmt.Sprintf("%v_%v", sid, externalID)
-}
-
-func order(amount, price float64, orderType int, ts int64) (*models.Order, error) {
-	logger.Info("order amount:", amount, "order type:", orderType, "order ts:", ts)
-	o, err := huobi.HuobiPlaceOrder(sp.Strategy, "btcusdt", orderType, amount)
-	if err != nil {
-		return o, err
-	}
-	o.RefrencePrice = price
-	o.Ts = ts
-	err = o.Save()
-	return o, err
-}
-
-// 结算买单和卖单
-func settle(bo, so *models.Order) error {
-	// TODO:改成事务
-	bo.Status = models.OrderStatusSettle
-	err := bo.Save()
-	if err != nil {
-		return err
-	}
-	so.Status = models.OrderStatusSettle
-	err = so.Save()
-	if err != nil {
-		return err
-	}
-	fee := so.Fee + bo.Fee
-	ids := []uint{bo.ID, so.ID}
-	idsByte, _ := json.Marshal(ids)
-	p := &models.Profit{
-		StrategyID:  sp.Strategy.ID,
-		TotalAmount: sp.Strategy.TotalAmount,
-		Depth:       sp.Strategy.Depth,
-		FloatRate:   sp.Strategy.FloatRate,
-		Capital:     bo.Money,
-		InCome:      so.Money,
-		Fee:         fee,
-		Profit:      so.Money - bo.Money,
-		Reason:      "five_up_down",
-		Day:         util.GetTodayDay(),
-		Orders:      string(idsByte),
-	}
-	err = p.Save()
-	return err
 }

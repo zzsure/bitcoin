@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/satori/go.uuid"
 	"bitcoin/library/util/net"
+	"github.com/satori/go.uuid"
 )
 
 func GetTodayDay() string {
@@ -94,4 +94,18 @@ func GetBackNum(num, divisor int) (int, int) {
 	d := num / divisor
 	r := d % 10
 	return d, r
+}
+
+func GetOrderKey(sid uint, externalID string) string {
+	return fmt.Sprintf("%v_%v", sid, externalID)
+}
+
+func GetDateByTime(t time.Time) string {
+	var cstSh, _ = time.LoadLocation("Asia/Shanghai")
+	day := t.In(cstSh).Format("20060102")
+	return day
+}
+
+func GetTimeByUnixTime(ut int64) time.Time {
+	return time.Unix(ut, 0)
 }

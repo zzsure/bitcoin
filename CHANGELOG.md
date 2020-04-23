@@ -1,5 +1,9 @@
 # bitcoin
 
+## 1.0.9 2020-04-22
+- 各个策略的余额更新到strategy表中
+- five up down和random buy float sale策略
+
 ## 1.0.8 2020-01-23
 - 余额放入redis
 
