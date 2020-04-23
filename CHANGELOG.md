@@ -2,7 +2,7 @@
 
 ## 1.0.9 2020-04-22
 - 各个策略的余额更新到strategy表中
-- five up down和random buy float sale策略
+- day float策略，每日定投x，浮动f后卖出，设置strategy的float_rate和per_money参数
 
 ## 1.0.8 2020-01-23
 - 余额放入redis
