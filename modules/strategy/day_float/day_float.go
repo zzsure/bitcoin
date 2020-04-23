@@ -51,6 +51,8 @@ func strategyProcessDeal(kld *models.KLineData) error {
 	date := util.GetDateByTime(time.Now())
 	// TODO：加锁，上一个不完成，不能下第二单
 	if _, ok := sp.DateMap[date]; !ok {
+		logger.Info("order date: ", date)
+		sp.DateMap[date] = new(models.Order)
 		amount := sp.Strategy.PerMoney / kld.Open
 		o, err := order.Order(sp.Strategy, amount, kld.Open, models.OrderTypeBuy, kld.Ts)
 		if err == nil {
@@ -76,6 +78,7 @@ func addOrderToProcess(s models.Strategy, o *models.Order) {
 	sp.OrderMap[key] = o
 	t := util.GetTimeByUnixTime(o.Ts)
 	date := util.GetDateByTime(t)
+	logger.Info("add order to process date: ", date)
 	sp.DateMap[date] = o
 }
 
