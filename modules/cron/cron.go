@@ -64,6 +64,7 @@ func getHuobiBalance() {
 		s.BtcBalance = huobi.GetCurrencyBalance(s, "btc")
 		allBtc += s.BtcBalance
 		s.RmbValue = (s.UsdtBalance + s.BtcBalance*price) * 7
+		logger.Info("strategy id:", s.ID, ", usdt:", s.UsdtBalance, ", btc:", s.BtcBalance, ", price:", price, ", rmb: ", s.RmbValue)
 		err := s.Save()
 		if err != nil {
 			logger.Error("save strategy id: ", s.ID, ", err: ", err)
