@@ -53,6 +53,7 @@ func getHuobiBalance() {
 	r := huobi.GetKLine("btcusdt", "1min", 1)
 	if len(r.Data) > 0 {
 		data := r.Data[0]
+		// TODO: price may be 0.0
 		price = data.Open
 	}
 
@@ -64,8 +65,10 @@ func getHuobiBalance() {
 		allUsdt += s.UsdtBalance
 		s.BtcBalance = huobi.GetCurrencyBalance(s, "btc")
 		allBtc += s.BtcBalance
-		s.RmbValue = (s.UsdtBalance + s.BtcBalance*price) * 7
-		logger.Info("strategy id:", s.ID, ", usdt:", s.UsdtBalance, ", btc:", s.BtcBalance, ", price:", price, ", rmb: ", s.RmbValue)
+		if price != 0.0 {
+			s.RmbValue = (s.UsdtBalance + s.BtcBalance*price) * 7
+			logger.Info("strategy id:", s.ID, ", usdt:", s.UsdtBalance, ", btc:", s.BtcBalance, ", price:", price, ", rmb: ", s.RmbValue)
+		}
 		err := s.Save()
 		if err != nil {
 			logger.Error("save strategy id: ", s.ID, ", err: ", err)
