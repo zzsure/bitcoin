@@ -34,6 +34,7 @@ func getHuobiKLineCron() {
 }
 
 func getBalanceCron() {
+	getHuobiBalance()
 	c.AddFunc("@every 1h", func() {
 		logger.Info("get balance cron begin")
 		getHuobiBalance()
