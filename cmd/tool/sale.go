@@ -66,6 +66,12 @@ func saleStrategy(strategyID int) error {
 	if len(r.Data) > 0 {
 		rp = (r.Data[0].High + r.Data[0].Low) / 2
 	}
+
+	balance := huobi.GetCurrencyBalance(strategy, "btc")
+	if balance < amount {
+		amount = balance
+	}
+
 	o, err := huobi.HuobiPlaceOrder(strategy, "btcusdt", models.OrderTypeSale, amount)
 	if err != nil {
 		return err
