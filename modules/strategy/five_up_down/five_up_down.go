@@ -41,7 +41,7 @@ func Init(strategy models.Strategy) {
 func StrategyDeal(kld *models.KLineData) {
 	//kld.Open = 11811.10
 	if nil == sp {
-		logger.Error("sp is nil...")
+		//logger.Error("sp is nil...")
 		return
 	}
 	logger.Info("strategy:", sp.Strategy.Name, "price:", kld.Open, " timestamp:", kld.Ts, " come in deal kline")
