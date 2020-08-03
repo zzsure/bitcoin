@@ -49,6 +49,7 @@ func strategyProcessDeal(kld *models.KLineData) error {
 	loc, _ := time.LoadLocation("Asia/Shanghai")
 	t := time.Now().In(loc)
 	if t.Weekday() != time.Sunday || t.Hour() != 7 {
+		logger.Info("not sunday or not hour 7")
 		return nil
 		//return errors.New("not sunday or not hour 7")
 	}
@@ -76,6 +77,7 @@ func strategyProcessDeal(kld *models.KLineData) error {
 		}
 		addOrderToProcess(o)
 	} else {
+		logger.Info("already buy")
 		//return errors.New("")
 	}
 	return nil
