@@ -2,6 +2,7 @@ package strategy
 
 import (
 	"bitcoin/models"
+	"bitcoin/modules/strategy/auto_invest"
 	"bitcoin/modules/strategy/day_float"
 	"bitcoin/modules/strategy/five_up_down"
 	"bitcoin/modules/strategy/floating"
@@ -24,6 +25,8 @@ func Init() {
 			five_up_down.Init(s)
 		} else if s.Name == "day_float" {
 			day_float.Init(s)
+		} else if s.Name == "auto_invest" {
+			auto_invest.Init(s)
 		}
 	}
 }
@@ -32,4 +35,6 @@ func StrategyDeal(kld *models.KLineData) {
 	floating.StrategyDeal(kld)
 	five_up_down.StrategyDeal(kld)
 	day_float.StrategyDeal(kld)
+	// 定投，每周日7点定投，小于5000投50$，5000-10000：40$，10000-15000：30$，15000-20000：20$，大于20000：10$
+	auto_invest.StrategyDeal(kld)
 }
