@@ -3,6 +3,7 @@ package strategy
 import (
 	"bitcoin/models"
 	"bitcoin/modules/strategy/auto_invest"
+	"bitcoin/modules/strategy/day_invest"
 	"bitcoin/modules/strategy/day_float"
 	"bitcoin/modules/strategy/five_up_down"
 	"bitcoin/modules/strategy/floating"

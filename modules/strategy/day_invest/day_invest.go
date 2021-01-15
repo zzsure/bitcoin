@@ -1,4 +1,4 @@
-package auto_invest
+package day_invest
 
 import (
 	"bitcoin/library/util"
@@ -6,6 +6,7 @@ import (
 	"bitcoin/modules/order"
 	"github.com/op/go-logging"
 	"time"
+    "errors"
 )
 
 type StrategyProcess struct {
