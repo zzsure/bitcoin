@@ -37,14 +37,17 @@ func Init() {
 	}
 }
 
-func StrategyDeal(kld *models.KLineData) {
-	floating.StrategyDeal(kld)
-	five_up_down.StrategyDeal(kld)
-	day_float.StrategyDeal(kld)
-	// 按金额定投，每周日7点定投，小于5000投50$，5000-10000：40$，10000-15000：30$，15000-20000：20$，大于20000：10$
-	auto_invest.StrategyDeal(kld)
-    // 按比特币数量定投，每天定投0.001
-    day_invest.StrategyDeal(kld)
-	// 按照20$每日定投ETH
-	eth_day_invest.StrategyDeal(kld)
+func StrategyDeal(kld *models.KLineData, symbol string) {
+	if symbol == "btcusdt" {
+		floating.StrategyDeal(kld)
+		five_up_down.StrategyDeal(kld)
+		day_float.StrategyDeal(kld)
+		// 按金额定投，每周日7点定投，小于5000投50$，5000-10000：40$，10000-15000：30$，15000-20000：20$，大于20000：10$
+		auto_invest.StrategyDeal(kld)
+		// 按比特币数量定投，每天定投0.001
+		day_invest.StrategyDeal(kld)
+	} else if symbol == "ethusdt" {
+		// 按照20$每日定投ETH
+		eth_day_invest.StrategyDeal(kld)
+	}
 }

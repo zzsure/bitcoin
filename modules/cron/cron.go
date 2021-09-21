@@ -116,7 +116,7 @@ func getHuobiKLine(symbol, ch string) {
 		}
 		info, _ := json.Marshal(kld)
 		logger.Info("recv line: %s", string(info))
-		strategy.StrategyDeal(kld)
+		strategy.StrategyDeal(kld, symbol)
 		if lastKld != nil && lastKld.Ts != kld.Ts {
 			err := kld.Save()
 			if err != nil {
