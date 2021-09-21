@@ -28,7 +28,8 @@ func Init() {
 func getHuobiKLineCron() {
 	c.AddFunc("@every 10s", func() {
 		logger.Info("get huobi kline cron begin")
-		getHuobiKLine()
+		getHuobiKLine("btcusdt", "market.btcusdt.kline.1min")
+		getHuobiKLine("ethusdt", "market.ethusdt.kline.1min")
 		logger.Info("get huobi kline cron end")
 	})
 }
@@ -49,25 +50,35 @@ func getHuobiBalance() {
 		return
 	}
 
-	price := 0.0
+	btcPrice := 0.0
+	ethPrice := 0.0
 	r := huobi.GetKLine("btcusdt", "1min", 1)
 	if len(r.Data) > 0 {
 		data := r.Data[0]
 		// TODO: price may be 0.0
-		price = data.Open
+		btcPrice = data.Open
+	}
+	e := huobi.GetKLine("ethusdt", "1min", 1)
+	if len(e.Data) > 0 {
+		data := e.Data[0]
+		// TODO: price may be 0.0
+		ethPrice = data.Open
 	}
 
 	allUsdt := 0.0
 	allBtc := 0.0
+	allEth := 0.0
 
 	for _, s := range strategys {
 		s.UsdtBalance = huobi.GetCurrencyBalance(s, "usdt")
 		allUsdt += s.UsdtBalance
 		s.BtcBalance = huobi.GetCurrencyBalance(s, "btc")
 		allBtc += s.BtcBalance
-		if price != 0.0 {
-			s.RmbValue = (s.UsdtBalance + s.BtcBalance*price) * 7
-			logger.Info("strategy id:", s.ID, ", usdt:", s.UsdtBalance, ", btc:", s.BtcBalance, ", price:", price, ", rmb: ", s.RmbValue)
+		s.EthBalance = huobi.GetCurrencyBalance(s, "eth")
+		allEth += s.EthBalance
+		if btcPrice != 0.0 {
+			s.RmbValue = (s.UsdtBalance + s.BtcBalance * btcPrice + s.EthBalance * ethPrice) * 7
+			logger.Info("strategy id:", s.ID, ", usdt:", s.UsdtBalance, ", btc:", s.BtcBalance, ", btcPrice:", btcPrice, ", ethPrice:", ethPrice, ", rmb: ", s.RmbValue)
 		}
 		err := s.Save()
 		if err != nil {
@@ -77,6 +88,7 @@ func getHuobiBalance() {
 	balanceMap := make(map[string]float64)
 	balanceMap["usdt"] = allUsdt
 	balanceMap["btc"] = allBtc
+	balanceMap["eth"] = allEth
 	b, _ := json.Marshal(balanceMap)
 	logger.Info("balace map", string(b))
 	if conf.Config.Redis.IsUse {
@@ -86,8 +98,8 @@ func getHuobiBalance() {
 	}
 }
 
-func getHuobiKLine() {
-	r := huobi.GetKLine("btcusdt", "1min", 1)
+func getHuobiKLine(symbol, ch string) {
+	r := huobi.GetKLine(symbol, "1min", 1)
 	if len(r.Data) > 0 {
 		data := r.Data[0]
 		kld := &models.KLineData{
@@ -99,7 +111,7 @@ func getHuobiKLine() {
 			Low:    data.Low,
 			High:   data.High,
 			Vol:    data.Vol,
-			Ch:     "market.btcusdt.kline.1min",
+			Ch:     ch,
 			Ts:     data.ID,
 		}
 		info, _ := json.Marshal(kld)

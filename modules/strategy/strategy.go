@@ -5,6 +5,7 @@ import (
 	"bitcoin/modules/strategy/auto_invest"
 	"bitcoin/modules/strategy/day_invest"
 	"bitcoin/modules/strategy/day_float"
+	"bitcoin/modules/strategy/eth_day_invest"
 	"bitcoin/modules/strategy/five_up_down"
 	"bitcoin/modules/strategy/floating"
 	"github.com/op/go-logging"
@@ -30,7 +31,9 @@ func Init() {
 			auto_invest.Init(s)
 		} else if s.Name == "day_invest" {
             day_invest.Init(s)
-        }
+        } else if s.Name == "eth_day_invest" {
+        	eth_day_invest.Init(s)
+		}
 	}
 }
 
@@ -42,4 +45,6 @@ func StrategyDeal(kld *models.KLineData) {
 	auto_invest.StrategyDeal(kld)
     // 按比特币数量定投，每天定投0.001
     day_invest.StrategyDeal(kld)
+	// 按照20$每日定投ETH
+	eth_day_invest.StrategyDeal(kld)
 }

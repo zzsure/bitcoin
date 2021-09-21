@@ -15,6 +15,7 @@ type Strategy struct {
 	Status      int     `json:"status"`       // 0未启用，1启用
 	UsdtBalance float64 `json:"usdt_balance"` // usdt余额
 	BtcBalance  float64 `json:"btc_balance"`  // btc余额
+	EthBalance  float64 `json:"eth_balance"`  // eth余额
 	RmbValue    float64 `json:"rmb_value"`    // 当前人民币估值
 	PerMoney    float64 `json:"per_money"`    // 每次购买多少金额
 }

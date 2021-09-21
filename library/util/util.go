@@ -106,6 +106,10 @@ func GetDateByTime(t time.Time) string {
 	return day
 }
 
+func GetCurlHour(t time.Time) int {
+	return t.Hour()
+}
+
 func GetTimeByUnixTime(ut int64) time.Time {
 	return time.Unix(ut, 0)
 }
